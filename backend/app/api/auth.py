@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 import bcrypt
 from pydantic import BaseModel
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -15,48 +15,44 @@ router = APIRouter()
 class AuthRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
-    mobile: Optional[str] = None
     password: str
     confirm_password: Optional[str] = None
 
 
 @router.post("/register")
 async def register(credentials: AuthRequest, db: Session = Depends(get_db)):
-    """Register a new user with email or mobile"""
+    """Register a new user with email"""
     if len(credentials.password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
 
-    email = credentials.email.strip().lower() if credentials.email else None
-    mobile = credentials.mobile.strip() if credentials.mobile else None
+    if not credentials.email:
+        raise HTTPException(status_code=400, detail="Email is required")
 
-    if not email and not mobile:
-        raise HTTPException(status_code=400, detail="Email or mobile number is required")
+    email = credentials.email.strip().lower()
 
     if credentials.confirm_password is not None and credentials.confirm_password != credentials.password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
 
     # Check if user already exists
-    existing_user = db.scalar(
-        select(User).where(or_(User.email == email, User.mobile == mobile))
-    )
+    existing_user = db.scalar(select(User).where(User.email == email))
 
     if existing_user:
-        raise HTTPException(status_code=409, detail="Email or mobile number is already registered")
+        raise HTTPException(status_code=409, detail="Email is already registered")
 
     password_hash = bcrypt.hashpw(credentials.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    user = User(email=email, mobile=mobile, password_hash=password_hash, is_admin=False)
+    user = User(email=email, password_hash=password_hash, is_admin=False)
     db.add(user)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=409, detail="Email or mobile number is already registered")
+        raise HTTPException(status_code=409, detail="Email is already registered")
     return {"message": "Registration successful", "user_id": user.id}
 
 
 @router.post("/login")
 async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
-    """Login user with email/mobile or admin with username"""
+    """Login user with email or admin with username"""
     if len(credentials.password) < 6:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -80,19 +76,15 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
             "username": user.username
         }
 
-    # Regular user login using email or mobile
-    email = credentials.email.strip().lower() if credentials.email else None
-    mobile = credentials.mobile.strip() if credentials.mobile else None
+    # Regular user login using email
+    if not credentials.email:
+        raise HTTPException(status_code=401, detail="Email is required")
 
-    if not email and not mobile:
-        raise HTTPException(status_code=401, detail="Email or mobile number is required")
-
-    field = User.email if email else User.mobile
-    identifier = email if email else mobile
-    user = db.scalar(select(User).where(field == identifier, User.is_active.is_(True)))
+    email = credentials.email.strip().lower()
+    user = db.scalar(select(User).where(User.email == email, User.is_active.is_(True)))
 
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid email/mobile or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     password_matches = bcrypt.checkpw(
         credentials.password.encode("utf-8"),
@@ -100,13 +92,12 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
     )
 
     if not password_matches:
-        raise HTTPException(status_code=401, detail="Invalid email/mobile or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
     return {
         "message": "Signed in successfully",
         "user_id": user.id,
         "is_admin": False,
-        "email": user.email,
-        "mobile": user.mobile
+        "email": user.email
     }
 
