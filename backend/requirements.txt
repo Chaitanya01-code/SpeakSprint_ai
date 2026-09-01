@@ -2,3 +2,4 @@ uvicorn
 fastapi
 sqlalchemy
 bcrypt
+python-dotenv
