@@ -1,6 +1,9 @@
 .env
 .gitignore
-pyc
-_pycache__
-.dockerignore
+*.pyc
+__pycache__/
 .pyc
+.dockerignore
+.venv/
+*.db
+app.db
