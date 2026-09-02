@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import History from "../history";
 import "./design.css";
 
 const Dashboard = () => {
@@ -430,8 +431,15 @@ const Dashboard = () => {
           MAIN DASHBOARD AREA
       ==================================================================== */}
       <main className="ss-main-content">
-        {/* ==================== HEADER ROW ==================== */}
-        <header className="ss-header-row">
+        {activeNav === "History" ? (
+          <History
+            onStartChallenge={startChallengeSession}
+            onNavigateBack={() => setActiveNav("Dashboard")}
+          />
+        ) : (
+          <>
+            {/* ==================== HEADER ROW ==================== */}
+            <header className="ss-header-row">
           <div className="ss-greeting-box">
             <h1 className="ss-greeting-title">
               Good morning, Aditya! <span role="img" aria-label="wave">👋</span>
@@ -825,7 +833,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="ss-card-link"
-                onClick={() => setSelectedAttempt(recentAttempts[0])}
+                onClick={() => setActiveNav("History")}
               >
                 View All
               </button>
@@ -1002,7 +1010,9 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
-        </section>
+            </section>
+          </>
+        )}
       </main>
 
       {/* ====================================================================

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Dashboard from "./pages/dashboard/ui";
+import History from "./pages/history/ui";
 import Home from "./pages/homepage/home";
 
 function App() {
@@ -8,7 +9,7 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* View Switcher Bar (Discreet top bar for quick previewing between Dashboard & Home) */}
+      {/* View Switcher Bar (Discreet bottom bar for quick previewing between Views) */}
       <div
         style={{
           position: "fixed",
@@ -44,6 +45,23 @@ function App() {
         </button>
         <button
           type="button"
+          onClick={() => setCurrentView("history")}
+          style={{
+            background: currentView === "history" ? "#5D5FEF" : "transparent",
+            color: "#FFFFFF",
+            border: "none",
+            borderRadius: "999px",
+            padding: "6px 14px",
+            fontSize: "12px",
+            fontWeight: "700",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          📅 History
+        </button>
+        <button
+          type="button"
           onClick={() => setCurrentView("home")}
           style={{
             background: currentView === "home" ? "#5D5FEF" : "transparent",
@@ -62,7 +80,15 @@ function App() {
       </div>
 
       {/* Render Selected View */}
-      {currentView === "dashboard" ? <Dashboard /> : <Home />}
+      {currentView === "dashboard" ? (
+        <Dashboard />
+      ) : currentView === "history" ? (
+        <div style={{ minHeight: "100vh", background: "#F7F8FC", padding: "24px 32px" }}>
+          <History onNavigateBack={() => setCurrentView("dashboard")} />
+        </div>
+      ) : (
+        <Home />
+      )}
     </div>
   );
 }
