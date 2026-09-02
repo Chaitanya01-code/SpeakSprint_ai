@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Dashboard from "./pages/dashboard/ui";
 import History from "./pages/history/ui";
+import Analytics from "./pages/analytics/ui";
 import Home from "./pages/homepage/home";
 
 function App() {
@@ -62,6 +63,23 @@ function App() {
         </button>
         <button
           type="button"
+          onClick={() => setCurrentView("analytics")}
+          style={{
+            background: currentView === "analytics" ? "#5D5FEF" : "transparent",
+            color: "#FFFFFF",
+            border: "none",
+            borderRadius: "999px",
+            padding: "6px 14px",
+            fontSize: "12px",
+            fontWeight: "700",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          📈 Analytics
+        </button>
+        <button
+          type="button"
           onClick={() => setCurrentView("home")}
           style={{
             background: currentView === "home" ? "#5D5FEF" : "transparent",
@@ -85,6 +103,10 @@ function App() {
       ) : currentView === "history" ? (
         <div style={{ minHeight: "100vh", background: "#F7F8FC", padding: "24px 32px" }}>
           <History onNavigateBack={() => setCurrentView("dashboard")} />
+        </div>
+      ) : currentView === "analytics" ? (
+        <div style={{ minHeight: "100vh", background: "#F7F8FC", padding: "24px 32px" }}>
+          <Analytics />
         </div>
       ) : (
         <Home />

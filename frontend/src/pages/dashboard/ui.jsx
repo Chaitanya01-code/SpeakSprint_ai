@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import History from "../history";
+import Analytics from "../analytics";
 import "./design.css";
 
 const Dashboard = () => {
@@ -436,6 +437,8 @@ const Dashboard = () => {
             onStartChallenge={startChallengeSession}
             onNavigateBack={() => setActiveNav("Dashboard")}
           />
+        ) : activeNav === "Analytics" ? (
+          <Analytics />
         ) : (
           <>
             {/* ==================== HEADER ROW ==================== */}
