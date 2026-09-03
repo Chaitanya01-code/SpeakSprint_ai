@@ -1,0 +1,394 @@
+/* ==========================================================================
+   SpeakSprint AI - Analytics Page Stylesheet (analytics.css)
+   ========================================================================== */
+
+:root {
+  --ss-primary: #5D5FEF;
+  --ss-primary-hover: #4E50E6;
+  --ss-primary-light: #ECEEFE;
+  --ss-primary-glow: rgba(93, 95, 239, 0.25);
+  
+  --ss-bg-app: #F7F8FC;
+  --ss-bg-card: #FFFFFF;
+  --ss-bg-card-subtle: #F8F9FD;
+  
+  --ss-text-heading: #1C2033;
+  --ss-text-body: #58627A;
+  --ss-text-muted: #8E98B0;
+  
+  --ss-border-main: #EEF1F8;
+  --ss-border-light: #F4F6FB;
+  
+  --ss-success: #10B981;
+  --ss-success-bg: #E8F8F0;
+  --ss-warning: #F59E0B;
+  --ss-warning-bg: #FEF3C7;
+  --ss-info: #3B82F6;
+  --ss-info-bg: #EFF6FF;
+  --ss-purple-bg: #F3F0FF;
+  
+  --ss-radius-sm: 8px;
+  --ss-radius-md: 14px;
+  --ss-radius-lg: 20px;
+  --ss-radius-xl: 24px;
+  
+  --ss-shadow-card: 0 2px 10px rgba(28, 32, 51, 0.03);
+  --ss-shadow-card-hover: 0 10px 24px rgba(28, 32, 51, 0.07);
+  --ss-shadow-primary: 0 8px 20px rgba(93, 95, 239, 0.28);
+  
+  --ss-font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ss-font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  
+  --ss-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Analytics Container Layout */
+.ss-analytics-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   1. HEADER ROW (Title & Timeframe Dropdown)
+   ========================================================================== */
+.ss-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ss-analytics-title {
+  font-family: var(--ss-font-display);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+  letter-spacing: -0.4px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ss-analytics-dropdown-wrap {
+  position: relative;
+}
+
+.ss-analytics-dropdown-btn {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--ss-transition);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.ss-analytics-dropdown-btn:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: var(--ss-text-heading);
+}
+
+.ss-analytics-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #FFFFFF;
+  border: 1px solid #EEF1F8;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  min-width: 140px;
+  z-index: 50;
+  overflow: hidden;
+  animation: ssFadeIn 0.15s ease-out;
+}
+
+.ss-analytics-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ss-text-body);
+  cursor: pointer;
+  transition: var(--ss-transition);
+}
+
+.ss-analytics-dropdown-item:hover {
+  background: #F4F5FD;
+  color: var(--ss-primary);
+}
+
+.ss-analytics-dropdown-item.active {
+  background: #EEF0FE;
+  color: var(--ss-primary);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   2. 4 METRIC STAT CARDS
+   ========================================================================== */
+.ss-analytics-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.ss-astat-card {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border-main);
+  border-radius: var(--ss-radius-lg);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--ss-shadow-card);
+  transition: var(--ss-transition);
+}
+
+.ss-astat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ss-shadow-card-hover);
+  border-color: #E2E7F5;
+}
+
+.ss-astat-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ss-text-muted);
+}
+
+.ss-astat-value {
+  font-family: var(--ss-font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* ==========================================================================
+   3. SCORE TREND CHART SECTION
+   ========================================================================== */
+.ss-trend-card {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border-main);
+  border-radius: var(--ss-radius-lg);
+  padding: 22px 26px 20px 26px;
+  box-shadow: var(--ss-shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: var(--ss-transition);
+}
+
+.ss-trend-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ss-trend-title {
+  font-family: var(--ss-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ss-text-heading);
+  margin: 0;
+}
+
+.ss-trend-chart-container {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  margin-top: 10px;
+}
+
+.ss-trend-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ss-trend-curve-line {
+  fill: none;
+  stroke: #4E50E6;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ss-trend-point-dot {
+  fill: #FFFFFF;
+  stroke: #4E50E6;
+  stroke-width: 2.6;
+  r: 5;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ss-trend-point-dot.peak {
+  fill: #4E50E6;
+  stroke: #4E50E6;
+  r: 5.5;
+}
+
+.ss-trend-point-dot:hover {
+  r: 7;
+  fill: #4E50E6;
+  stroke: #FFFFFF;
+  stroke-width: 2;
+}
+
+.ss-trend-point-text {
+  font-family: var(--ss-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ss-text-heading);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.ss-trend-axis-date {
+  font-size: 12px;
+  font-weight: 600;
+  fill: #94A3B8;
+  text-anchor: middle;
+}
+
+/* ==========================================================================
+   4. SKILLS RADAR & PROGRESS SECTION
+   ========================================================================== */
+.ss-skills-card {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border-main);
+  border-radius: var(--ss-radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--ss-shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: var(--ss-transition);
+}
+
+.ss-skills-title {
+  font-family: var(--ss-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ss-text-heading);
+  margin: 0;
+}
+
+.ss-skills-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 36px;
+  align-items: center;
+}
+
+/* Radar Chart Left Column */
+.ss-radar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 240px;
+}
+
+.ss-radar-svg-analytics {
+  width: 100%;
+  max-width: 320px;
+  height: 240px;
+  overflow: visible;
+}
+
+/* Skill Progress Bars Right Column */
+.ss-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.ss-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.ss-progress-name {
+  width: 110px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ss-text-heading);
+  flex-shrink: 0;
+}
+
+.ss-progress-track {
+  flex: 1;
+  height: 8px;
+  background: #ECEEFE;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ss-progress-fill {
+  height: 100%;
+  background: #5D5FEF;
+  border-radius: 999px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ss-progress-score {
+  width: 28px;
+  font-family: var(--ss-font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .ss-analytics-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ss-skills-content-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 680px) {
+  .ss-analytics-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .ss-progress-item {
+    gap: 10px;
+  }
+  .ss-progress-name {
+    width: 90px;
+    font-size: 12.5px;
+  }
+}

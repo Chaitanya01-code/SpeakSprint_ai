@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
+import History from "../history";
+import Analytics from "../analytics";
+import Leaderboard from "../leaderboard/ui";
+import Achievements from "../achievements/ui";
+import Profile from "../profile/ui";
 import "./design.css";
 
 const Dashboard = () => {
-  // Navigation active tab
+  // Navigation active state
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -10,11 +15,11 @@ const Dashboard = () => {
   const [timeframe, setTimeframe] = useState("This Week");
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
 
-  // Notifications popover
+  // Notifications popover state
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadNotif, setUnreadNotif] = useState(1);
 
-  // Interactive Challenge Practice Modal
+  // Challenge Practice Modal state
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
   const [recordingState, setRecordingState] = useState("idle"); // idle, recording, analyzing, completed
   const [countdown, setCountdown] = useState(60);
@@ -22,10 +27,10 @@ const Dashboard = () => {
     "How Artificial Intelligence is Shaping the Future of Creative Work"
   );
 
-  // Recent Attempts Selection Modal / Drawer
+  // Recent Attempts Modal / Drawer
   const [selectedAttempt, setSelectedAttempt] = useState(null);
 
-  // Achievements click tooltip
+  // Achievements Modal
   const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   // Weekly Progress Chart Data
@@ -55,6 +60,11 @@ const Dashboard = () => {
     currentWeeklyData.find((d) => d.isPeak) || currentWeeklyData[4]
   );
 
+  // Update hovered data point on timeframe change
+  useEffect(() => {
+    setHoveredDataPoint(currentWeeklyData.find((d) => d.isPeak) || currentWeeklyData[4]);
+  }, [timeframe]);
+
   // Generate smooth cubic bezier SVG path from data points
   const generateSmoothPath = (points) => {
     if (!points || points.length === 0) return "";
@@ -68,7 +78,7 @@ const Dashboard = () => {
     return path;
   };
 
-  // Skill Overview Radar Chart Geometry (6 Axes)
+  // Skill Overview Radar Chart Geometry (6 Axes matching image)
   const radarSkills = [
     { name: "Fluency", user: 88, avg: 72, angle: -90 },
     { name: "Grammar", user: 82, avg: 68, angle: -30 },
@@ -78,8 +88,8 @@ const Dashboard = () => {
     { name: "Topic Relevance", user: 84, avg: 75, angle: 210 },
   ];
 
-  const radarCenter = { x: 120, y: 100 };
-  const radarRadius = 65;
+  const radarCenter = { x: 120, y: 95 };
+  const radarRadius = 62;
 
   const calculateRadarPoint = (angleDeg, value) => {
     const angleRad = (angleDeg * Math.PI) / 180;
@@ -106,10 +116,9 @@ const Dashboard = () => {
     })
     .join(" ");
 
-  // Concentric hexagon levels
   const hexagonLevels = [0.25, 0.5, 0.75, 1.0];
 
-  // Recent attempts data
+  // Recent attempts data matching the screenshot
   const recentAttempts = [
     {
       id: 1,
@@ -119,7 +128,7 @@ const Dashboard = () => {
       status: "green",
       wpm: 138,
       clarity: "92%",
-      feedback: "Excellent vocabulary and articulate flow. Minor pause at 0:42.",
+      feedback: "Excellent vocabulary and articulate flow. Pacing was very engaging.",
     },
     {
       id: 2,
@@ -129,7 +138,7 @@ const Dashboard = () => {
       status: "orange",
       wpm: 120,
       clarity: "81%",
-      feedback: "Good arguments. Try reducing filler words like 'um' and 'actually'.",
+      feedback: "Strong logical arguments. Work on reducing conversational filler words.",
     },
     {
       id: 3,
@@ -139,7 +148,7 @@ const Dashboard = () => {
       status: "green",
       wpm: 145,
       clarity: "95%",
-      feedback: "Outstanding confidence, structured pacing, and accurate pronunciation!",
+      feedback: "Outstanding confidence, structured cadence, and crisp pronunciation!",
     },
     {
       id: 4,
@@ -149,43 +158,43 @@ const Dashboard = () => {
       status: "green",
       wpm: 132,
       clarity: "88%",
-      feedback: "Very relevant points with compelling examples. Well balanced cadence.",
+      feedback: "Well-crafted points with clear examples. Natural transition phrasing.",
     },
   ];
 
-  // Achievements Data
+  // Achievements data matching the screenshot
   const achievements = [
     {
       id: "first-challenge",
       title: "First Challenge",
       unlocked: "May 10, 2024",
-      desc: "Completed your first 60s speaking sprint",
+      desc: "Completed your first 60-second speaking sprint",
       type: "first",
     },
     {
       id: "streak-7",
       title: "7-Day Streak",
       unlocked: "May 16, 2024",
-      desc: "Practiced consistently for 7 days in a row",
+      desc: "Practiced speaking consistently for 7 days in a row",
       type: "streak",
     },
     {
       id: "top-speaker",
       title: "Top Speaker",
       unlocked: "May 14, 2024",
-      desc: "Scored over 90 points in 3 challenges",
+      desc: "Scored 90+ points across multiple speech challenges",
       type: "speaker",
     },
     {
       id: "grammar-master",
       title: "Grammar Master",
       unlocked: "May 15, 2024",
-      desc: "Maintained 95%+ grammar precision across sessions",
+      desc: "Achieved 95%+ grammatical precision in assessments",
       type: "grammar",
     },
   ];
 
-  // Speech Practice Simulation Timer
+  // Practice Simulation Timer
   useEffect(() => {
     let timer;
     if (recordingState === "recording" && countdown > 0) {
@@ -205,8 +214,8 @@ const Dashboard = () => {
     const randomTopics = [
       "How Artificial Intelligence is Shaping the Future of Creative Work",
       "The Impact of Remote Work on Global Communication",
-      "Why Effective Storytelling is a Critical Leadership Superpower",
-      "The Role of Renewable Energy in Combating Climate Change",
+      "Why Effective Storytelling is a Critical Leadership Skill",
+      "The Role of Sustainable Energy in Combating Climate Change",
       "How Daily Micro-Habits Compound Into Long-Term Success",
     ];
     setSelectedTopic(randomTopics[Math.floor(Math.random() * randomTopics.length)]);
@@ -249,12 +258,13 @@ const Dashboard = () => {
 
         {/* NAVIGATION LINKS */}
         <nav className="ss-nav-menu">
-          {/* Dashboard */}
+          {/* Dashboard (Active) */}
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Dashboard" ? "active" : ""}`}
             onClick={() => setActiveNav("Dashboard")}
           >
+            {/* Start Challenge tab removed */}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="9" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
               <rect x="14" y="3" width="7" height="5" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
@@ -262,22 +272,6 @@ const Dashboard = () => {
               <rect x="3" y="16" width="7" height="5" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
             </svg>
             <span>Dashboard</span>
-          </button>
-
-          {/* Start Challenge */}
-          <button
-            type="button"
-            className={`ss-nav-item ${activeNav === "Start Challenge" ? "active" : ""}`}
-            onClick={() => {
-              setActiveNav("Start Challenge");
-              startChallengeSession();
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" opacity="0.4" />
-            </svg>
-            <span>Start Challenge</span>
           </button>
 
           {/* History */}
@@ -352,69 +346,22 @@ const Dashboard = () => {
             <span>Profile</span>
           </button>
 
-          {/* Settings */}
-          <button
-            type="button"
-            className={`ss-nav-item ${activeNav === "Settings" ? "active" : ""}`}
-            onClick={() => setActiveNav("Settings")}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            <span>Settings</span>
-          </button>
         </nav>
-
-        {/* 7 DAY STREAK CARD */}
-        <div className="ss-streak-card">
-          <div className="ss-streak-header">
-            <span className="ss-streak-title">🔥 7 Day Streak</span>
-          </div>
-          <p className="ss-streak-sub">Keep it up!</p>
-          <div className="ss-streak-dots-row">
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-          </div>
-
-          {/* Celebratory horn / medal vector graphic */}
-          <div className="ss-streak-badge-art">
-            <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-              <path
-                d="M14 34L28 20L34 26L20 40L14 34Z"
-                fill="url(#hornGrad)"
-              />
-              <path
-                d="M28 20L36 12C38 10 42 10 42 14C42 18 38 22 34 26L28 20Z"
-                fill="#FFB020"
-              />
-              <circle cx="38" cy="10" r="3" fill="#EC4899" />
-              <circle cx="44" cy="22" r="2.5" fill="#8B5CF6" />
-              <circle cx="30" cy="8" r="2" fill="#3B82F6" />
-              <path
-                d="M14 34C11 37 8 38 6 42C10 40 11 37 14 34Z"
-                fill="#F59E0B"
-              />
-              <defs>
-                <linearGradient id="hornGrad" x1="14" y1="34" x2="34" y2="20" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#F59E0B" />
-                  <stop offset="1" stopColor="#EF4444" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-        </div>
 
         {/* USER PROFILE CARD */}
         <div className="ss-user-card" onClick={() => setActiveNav("Profile")}>
           <div className="ss-user-avatar">
             <svg viewBox="0 0 64 64" fill="none" width="100%" height="100%">
               <rect width="64" height="64" fill="#C7D2FE" />
-              <circle cx="32" cy="24" r="12" fill="#4F46E5" />
-              <path d="M12 56C12 45 21 40 32 40C43 40 52 45 52 56" fill="#4F46E5" />
+              {/* Aditya face portrait illustration */}
+              <circle cx="32" cy="24" r="13" fill="#374151" />
+              <circle cx="32" cy="25" r="11" fill="#FBBF24" />
+              <path d="M22 22C24 16 40 16 42 22C42 22 41 14 32 14C23 14 22 22 22 22Z" fill="#1F2937" />
+              <circle cx="28" cy="24" r="1.5" fill="#1F2937" />
+              <circle cx="36" cy="24" r="1.5" fill="#1F2937" />
+              <path d="M29 29C31 31 33 31 35 29" stroke="#1F2937" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M14 54C14 43 22 38 32 38C42 38 50 43 50 54" fill="#3B82F6" />
+              <path d="M27 38L32 45L37 38" fill="#FFFFFF" />
             </svg>
           </div>
           <div className="ss-user-info">
@@ -428,8 +375,23 @@ const Dashboard = () => {
           MAIN DASHBOARD AREA
       ==================================================================== */}
       <main className="ss-main-content">
-        {/* ==================== HEADER ROW ==================== */}
-        <header className="ss-header-row">
+        {activeNav === "History" ? (
+          <History
+            onStartChallenge={startChallengeSession}
+            onNavigateBack={() => setActiveNav("Dashboard")}
+          />
+        ) : activeNav === "Analytics" ? (
+          <Analytics />
+        ) : activeNav === "Leaderboard" ? (
+          <Leaderboard />
+        ) : activeNav === "Achievements" ? (
+          <Achievements />
+        ) : activeNav === "Profile" ? (
+          <Profile />
+        ) : (
+          <>
+            {/* ==================== HEADER ROW ==================== */}
+            <header className="ss-header-row">
           <div className="ss-greeting-box">
             <h1 className="ss-greeting-title">
               Good morning, Aditya! <span role="img" aria-label="wave">👋</span>
@@ -446,14 +408,14 @@ const Dashboard = () => {
                 onClick={() => setShowNotifications(!showNotifications)}
                 aria-label="Notifications"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
                 {unreadNotif > 0 && <span className="ss-notification-badge">{unreadNotif}</span>}
               </button>
 
-              {/* Notifications Dropdown */}
+              {/* Notifications Popover */}
               {showNotifications && (
                 <div className="ss-notifications-popover">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #EEF1F8", paddingBottom: "8px" }}>
@@ -522,7 +484,7 @@ const Dashboard = () => {
             <div className="ss-stat-top">
               <span className="ss-stat-label">Average Score</span>
               <div className="ss-stat-badge-icon trend-green">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="7" y1="17" x2="17" y2="7" />
                   <polyline points="7 7 17 7 17 17" />
                 </svg>
@@ -539,7 +501,7 @@ const Dashboard = () => {
             <div className="ss-stat-top">
               <span className="ss-stat-label">Best Score</span>
               <div className="ss-stat-badge-icon crown-gold">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M2 19h20v2H2v-2Zm1.5-12 4.5 6 4-8 4 8 4.5-6L22 17H2L3.5 7Z" />
                 </svg>
               </div>
@@ -555,7 +517,7 @@ const Dashboard = () => {
             <div className="ss-stat-top">
               <span className="ss-stat-label">Challenges Completed</span>
               <div className="ss-stat-badge-icon users-blue">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -574,7 +536,7 @@ const Dashboard = () => {
             <div className="ss-stat-top">
               <span className="ss-stat-label">Total Speaking Time</span>
               <div className="ss-stat-badge-icon time-purple">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
@@ -609,7 +571,7 @@ const Dashboard = () => {
                   <div style={{
                     position: "absolute",
                     right: 0,
-                    top: "32px",
+                    top: "30px",
                     background: "#FFFFFF",
                     border: "1px solid #EEF1F8",
                     borderRadius: "8px",
@@ -654,7 +616,7 @@ const Dashboard = () => {
                   className="ss-chart-tooltip-callout"
                   style={{
                     left: `${(hoveredDataPoint.x / 420) * 100}%`,
-                    top: `${hoveredDataPoint.y - 10}px`,
+                    top: `${hoveredDataPoint.y - 8}px`,
                   }}
                 >
                   {hoveredDataPoint.score}
@@ -709,7 +671,7 @@ const Dashboard = () => {
             </div>
 
             <div className="ss-radar-container">
-              <svg viewBox="0 0 240 200" className="ss-radar-svg">
+              <svg viewBox="0 0 240 190" className="ss-radar-svg">
                 {/* Concentric Hexagons */}
                 {hexagonLevels.map((lvl, lvlIdx) => {
                   const points = radarSkills
@@ -752,7 +714,7 @@ const Dashboard = () => {
                   fill="none"
                   stroke="#94A3B8"
                   strokeDasharray="4 4"
-                  strokeWidth="1.5"
+                  strokeWidth="1.4"
                 />
 
                 {/* User Polygon (Purple fill + solid outline) */}
@@ -771,7 +733,7 @@ const Dashboard = () => {
                       key={idx}
                       cx={pt.x}
                       cy={pt.y}
-                      r="3.5"
+                      r="3.2"
                       fill="#5D5FEF"
                       stroke="#FFFFFF"
                       strokeWidth="1.5"
@@ -793,7 +755,7 @@ const Dashboard = () => {
                       y={labelPt.y + 4}
                       textAnchor={textAnchor}
                       fill="#8E98B0"
-                      fontSize="9.5"
+                      fontSize="9"
                       fontWeight="600"
                     >
                       {s.name}
@@ -823,7 +785,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="ss-card-link"
-                onClick={() => setSelectedAttempt(recentAttempts[0])}
+                onClick={() => setActiveNav("History")}
               >
                 View All
               </button>
@@ -838,7 +800,7 @@ const Dashboard = () => {
                 >
                   <div className="ss-attempt-left">
                     <div className="ss-attempt-icon-box">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                       </svg>
@@ -877,11 +839,11 @@ const Dashboard = () => {
               </button>
             </div>
 
-            {/* Target Dartboard Vector Illustration */}
+            {/* Target Dartboard Illustration */}
             <div className="ss-target-illustration">
-              <svg width="140" height="140" viewBox="0 0 160 160" fill="none">
+              <svg width="135" height="135" viewBox="0 0 160 160" fill="none">
                 {/* Background Shadow */}
-                <ellipse cx="80" cy="145" rx="55" ry="8" fill="#E2E7FA" />
+                <ellipse cx="80" cy="144" rx="52" ry="7" fill="#E2E7FA" />
 
                 {/* Outer Ring */}
                 <circle cx="80" cy="80" r="64" stroke="#8B8DF9" strokeWidth="6" strokeDasharray="6 6" fill="#F8F9FF" />
@@ -895,12 +857,10 @@ const Dashboard = () => {
                 {/* Bullseye Center */}
                 <circle cx="80" cy="80" r="8" fill="#5D5FEF" />
 
-                {/* Arrow / Dart hitting center */}
+                {/* Arrow hitting bullseye */}
                 <g transform="translate(10, -8)">
                   <line x1="72" y1="86" x2="124" y2="40" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-                  {/* Arrow Point */}
                   <polygon points="70,88 80,82 76,92" fill="#D97706" />
-                  {/* Arrow Feathers */}
                   <polygon points="124,40 134,32 128,48" fill="#EF4444" />
                   <polygon points="120,44 130,36 124,52" fill="#F59E0B" />
                 </g>
@@ -931,12 +891,10 @@ const Dashboard = () => {
                   <div className="ss-badge-shield-wrap">
                     {/* First Challenge Badge */}
                     {ach.type === "first" && (
-                      <svg width="60" height="68" viewBox="0 0 64 74" fill="none">
+                      <svg width="58" height="66" viewBox="0 0 64 74" fill="none">
                         <path d="M32 4L54 14V38C54 53 44 65 32 70C20 65 10 53 10 38V14L32 4Z" fill="url(#firstShield)" />
                         <path d="M32 8L50 16V37C50 49 42 59 32 63C22 59 14 49 14 37V16L32 8Z" stroke="#E0E7FF" strokeWidth="1.5" />
-                        {/* Laurel / Ribbon */}
                         <path d="M22 46C20 40 22 32 25 28M42 46C44 40 42 32 39 28" stroke="#FBBF24" strokeWidth="2.5" strokeLinecap="round" />
-                        {/* Golden Avatar Icon */}
                         <circle cx="32" cy="28" r="6" fill="#FBBF24" />
                         <path d="M24 44C24 38 28 36 32 36C36 36 40 38 40 44" fill="#FBBF24" />
                         <defs>
@@ -950,12 +908,10 @@ const Dashboard = () => {
 
                     {/* 7-Day Streak Badge */}
                     {ach.type === "streak" && (
-                      <svg width="60" height="68" viewBox="0 0 64 74" fill="none">
+                      <svg width="58" height="66" viewBox="0 0 64 74" fill="none">
                         <path d="M32 4L54 14V38C54 53 44 65 32 70C20 65 10 53 10 38V14L32 4Z" fill="url(#streakShield)" />
                         <path d="M32 8L50 16V37C50 49 42 59 32 63C22 59 14 49 14 37V16L32 8Z" stroke="#FEF3C7" strokeWidth="1.5" />
-                        {/* Laurels */}
                         <path d="M22 46C20 40 22 32 25 28M42 46C44 40 42 32 39 28" stroke="#FBBF24" strokeWidth="2.5" strokeLinecap="round" />
-                        {/* Flame */}
                         <path d="M32 22C32 22 26 28 26 34C26 38 29 41 32 41C35 41 38 38 38 34C38 30 35 28 35 28C35 28 35 32 33 33C32 33 31 32 32 22Z" fill="#FBBF24" />
                         <defs>
                           <linearGradient id="streakShield" x1="10" y1="4" x2="54" y2="70" gradientUnits="userSpaceOnUse">
@@ -968,12 +924,10 @@ const Dashboard = () => {
 
                     {/* Top Speaker Badge */}
                     {ach.type === "speaker" && (
-                      <svg width="60" height="68" viewBox="0 0 64 74" fill="none">
+                      <svg width="58" height="66" viewBox="0 0 64 74" fill="none">
                         <path d="M32 4L54 14V38C54 53 44 65 32 70C20 65 10 53 10 38V14L32 4Z" fill="url(#speakerShield)" />
                         <path d="M32 8L50 16V37C50 49 42 59 32 63C22 59 14 49 14 37V16L32 8Z" stroke="#FCE7F3" strokeWidth="1.5" />
-                        {/* Laurels */}
                         <path d="M22 46C20 40 22 32 25 28M42 46C44 40 42 32 39 28" stroke="#FBBF24" strokeWidth="2.5" strokeLinecap="round" />
-                        {/* Speaker Silhouette */}
                         <circle cx="32" cy="26" r="5" fill="#FBBF24" />
                         <path d="M25 42L28 34H36L39 42H25Z" fill="#FBBF24" />
                         <defs>
@@ -987,12 +941,10 @@ const Dashboard = () => {
 
                     {/* Grammar Master Badge */}
                     {ach.type === "grammar" && (
-                      <svg width="60" height="68" viewBox="0 0 64 74" fill="none">
+                      <svg width="58" height="66" viewBox="0 0 64 74" fill="none">
                         <path d="M32 4L54 14V38C54 53 44 65 32 70C20 65 10 53 10 38V14L32 4Z" fill="url(#grammarShield)" />
                         <path d="M32 8L50 16V37C50 49 42 59 32 63C22 59 14 49 14 37V16L32 8Z" stroke="#FEF3C7" strokeWidth="1.5" />
-                        {/* Laurels */}
                         <path d="M22 46C20 40 22 32 25 28M42 46C44 40 42 32 39 28" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
-                        {/* Trophy / V Emblem */}
                         <path d="M26 26H38V32C38 36 35 39 32 39C29 39 26 36 26 32V26Z" fill="#FFFFFF" />
                         <path d="M30 39H34V43H30V39Z" fill="#FFFFFF" />
                         <path d="M28 43H36V45H28V43Z" fill="#FFFFFF" />
@@ -1010,7 +962,9 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
-        </section>
+            </section>
+          </>
+        )}
       </main>
 
       {/* ====================================================================
@@ -1023,11 +977,11 @@ const Dashboard = () => {
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <span style={{ fontSize: "24px" }}>🎙️</span>
                 <div>
-                  <h2 style={{ fontSize: "18px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
+                  <h2 style={{ fontSize: "17px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
                     60-Second Speaking Sprint
                   </h2>
                   <p style={{ fontSize: "12px", color: "#8E98B0", margin: 0 }}>
-                    Speak freely on the topic below. AI will analyze your speech.
+                    Speak clearly on the topic below. AI will analyze your speech.
                   </p>
                 </div>
               </div>
@@ -1040,14 +994,14 @@ const Dashboard = () => {
               </button>
             </div>
 
-            {/* Topic Box */}
+            {/* Topic Prompt */}
             <div className="ss-topic-box">
               <span className="ss-topic-label">Your Prompt</span>
               <p className="ss-topic-text">{selectedTopic}</p>
             </div>
 
-            {/* Live Audio Visualizer / Timer */}
-            <div style={{ textAlign: "center", padding: "10px 0" }}>
+            {/* Live Audio Waveform / Timer */}
+            <div style={{ textAlign: "center", padding: "6px 0" }}>
               <div className="ss-timer-display">
                 00:{countdown < 10 ? `0${countdown}` : countdown}
               </div>
@@ -1066,19 +1020,19 @@ const Dashboard = () => {
               </div>
 
               {recordingState === "idle" && (
-                <p style={{ fontSize: "13px", color: "#8E98B0" }}>
+                <p style={{ fontSize: "12.5px", color: "#8E98B0" }}>
                   Take a breath and click <strong>Start Recording</strong> when ready!
                 </p>
               )}
 
               {recordingState === "recording" && (
-                <p style={{ fontSize: "13px", color: "#EF4444", fontWeight: "600" }}>
+                <p style={{ fontSize: "12.5px", color: "#EF4444", fontWeight: "600" }}>
                   🔴 Live Recording in progress... Keep speaking!
                 </p>
               )}
 
               {recordingState === "analyzing" && (
-                <p style={{ fontSize: "13px", color: "#5D5FEF", fontWeight: "600" }}>
+                <p style={{ fontSize: "12.5px", color: "#5D5FEF", fontWeight: "600" }}>
                   ⚡ AI is evaluating your speech metrics (Fluency, Grammar, Tone)...
                 </p>
               )}
@@ -1088,26 +1042,26 @@ const Dashboard = () => {
                   background: "#F0FDF4",
                   border: "1px solid #BBF7D0",
                   borderRadius: "12px",
-                  padding: "14px",
-                  marginTop: "10px",
+                  padding: "12px 16px",
+                  marginTop: "8px",
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontWeight: "700", color: "#166534", fontSize: "15px" }}>
+                    <span style={{ fontWeight: "700", color: "#166534", fontSize: "14px" }}>
                       🎉 Challenge Completed!
                     </span>
                     <span style={{
                       background: "#16A34A",
                       color: "#FFFFFF",
-                      padding: "4px 10px",
+                      padding: "3px 9px",
                       borderRadius: "999px",
                       fontWeight: "800",
-                      fontSize: "13px",
+                      fontSize: "12px",
                     }}>
                       Score: 90 / 100
                     </span>
                   </div>
-                  <p style={{ fontSize: "12px", color: "#15803D", margin: "8px 0 0 0", textAlign: "left" }}>
-                    Great pacing (136 WPM) and clear structure. Recommendation: Minimize filler pauses in transition sentences.
+                  <p style={{ fontSize: "12px", color: "#15803D", margin: "6px 0 0 0", textAlign: "left" }}>
+                    Great pacing (136 WPM) and clear structure. Minor recommendation: Minimize filler pauses in transition sentences.
                   </p>
                 </div>
               )}
@@ -1160,7 +1114,7 @@ const Dashboard = () => {
           <div className="ss-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="ss-modal-header">
               <div>
-                <h2 style={{ fontSize: "18px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
+                <h2 style={{ fontSize: "17px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
                   {selectedAttempt.title}
                 </h2>
                 <p style={{ fontSize: "12px", color: "#8E98B0", margin: "2px 0 0 0" }}>
@@ -1176,30 +1130,30 @@ const Dashboard = () => {
               </button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
-              <div style={{ background: "#F8F9FE", padding: "12px", borderRadius: "10px", textAlign: "center" }}>
-                <span style={{ fontSize: "11px", color: "#8E98B0", fontWeight: "600" }}>SCORE</span>
-                <div style={{ fontSize: "24px", fontWeight: "800", color: "#10B981" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+              <div style={{ background: "#F8F9FE", padding: "10px", borderRadius: "10px", textAlign: "center" }}>
+                <span style={{ fontSize: "10.5px", color: "#8E98B0", fontWeight: "600" }}>SCORE</span>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "#10B981" }}>
                   {selectedAttempt.score}
                 </div>
               </div>
-              <div style={{ background: "#F8F9FE", padding: "12px", borderRadius: "10px", textAlign: "center" }}>
-                <span style={{ fontSize: "11px", color: "#8E98B0", fontWeight: "600" }}>SPEED</span>
-                <div style={{ fontSize: "24px", fontWeight: "800", color: "#5D5FEF" }}>
-                  {selectedAttempt.wpm} <span style={{ fontSize: "12px" }}>wpm</span>
+              <div style={{ background: "#F8F9FE", padding: "10px", borderRadius: "10px", textAlign: "center" }}>
+                <span style={{ fontSize: "10.5px", color: "#8E98B0", fontWeight: "600" }}>SPEED</span>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "#5D5FEF" }}>
+                  {selectedAttempt.wpm} <span style={{ fontSize: "11px" }}>wpm</span>
                 </div>
               </div>
-              <div style={{ background: "#F8F9FE", padding: "12px", borderRadius: "10px", textAlign: "center" }}>
-                <span style={{ fontSize: "11px", color: "#8E98B0", fontWeight: "600" }}>CLARITY</span>
-                <div style={{ fontSize: "24px", fontWeight: "800", color: "#F59E0B" }}>
+              <div style={{ background: "#F8F9FE", padding: "10px", borderRadius: "10px", textAlign: "center" }}>
+                <span style={{ fontSize: "10.5px", color: "#8E98B0", fontWeight: "600" }}>CLARITY</span>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "#F59E0B" }}>
                   {selectedAttempt.clarity}
                 </div>
               </div>
             </div>
 
-            <div style={{ background: "#F7F8FE", border: "1px solid #EEF1F8", borderRadius: "12px", padding: "14px" }}>
-              <span style={{ fontSize: "12px", fontWeight: "700", color: "#5D5FEF" }}>AI Feedback Summary</span>
-              <p style={{ fontSize: "13.5px", color: "#1C2033", margin: "6px 0 0 0", lineHeight: "1.5" }}>
+            <div style={{ background: "#F7F8FE", border: "1px solid #EEF1F8", borderRadius: "12px", padding: "12px" }}>
+              <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#5D5FEF" }}>AI Feedback Summary</span>
+              <p style={{ fontSize: "13px", color: "#1C2033", margin: "4px 0 0 0", lineHeight: "1.5" }}>
                 {selectedAttempt.feedback}
               </p>
             </div>
@@ -1221,7 +1175,7 @@ const Dashboard = () => {
       ==================================================================== */}
       {selectedAchievement && (
         <div className="ss-modal-overlay" onClick={() => setSelectedAchievement(null)}>
-          <div className="ss-modal-card" style={{ maxWidth: "420px", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+          <div className="ss-modal-card" style={{ maxWidth: "400px", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
             <div className="ss-modal-header" style={{ justifyContent: "flex-end" }}>
               <button
                 type="button"
@@ -1232,15 +1186,15 @@ const Dashboard = () => {
               </button>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-              <div style={{ fontSize: "48px" }}>🏆</div>
-              <h2 style={{ fontSize: "20px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+              <div style={{ fontSize: "44px" }}>🏆</div>
+              <h2 style={{ fontSize: "19px", fontWeight: "800", margin: 0, color: "#1C2033" }}>
                 {selectedAchievement.title}
               </h2>
-              <span style={{ fontSize: "12px", color: "#10B981", fontWeight: "700", background: "#E8F8F0", padding: "3px 10px", borderRadius: "999px" }}>
+              <span style={{ fontSize: "11.5px", color: "#10B981", fontWeight: "700", background: "#E8F8F0", padding: "3px 9px", borderRadius: "999px" }}>
                 Unlocked on {selectedAchievement.unlocked}
               </span>
-              <p style={{ fontSize: "14px", color: "#58627A", margin: "10px 0 16px 0" }}>
+              <p style={{ fontSize: "13px", color: "#58627A", margin: "8px 0 14px 0" }}>
                 {selectedAchievement.desc}
               </p>
             </div>
