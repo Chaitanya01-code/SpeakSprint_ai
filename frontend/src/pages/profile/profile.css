@@ -120,6 +120,73 @@
   height: 100%;
 }
 
+.ss-profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ss-profile-picture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ss-profile-picture-button,
+.ss-profile-picture-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 31px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ss-profile-picture-button {
+  border: 1px solid #dedcff;
+  color: #5148c5;
+  background: #f7f6ff;
+}
+
+.ss-profile-picture-button:hover {
+  background: #eeedff;
+}
+
+.ss-profile-picture-button svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.ss-profile-picture-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.ss-profile-picture-remove {
+  border: 1px solid #f0d7d7;
+  color: #b45353;
+  background: #fff;
+}
+
+.ss-profile-picture-remove:hover {
+  background: #fff6f6;
+}
+
 .ss-profile-identity-panel h2,
 .ss-profile-details-panel h2,
 .ss-streaks-panel h2 {

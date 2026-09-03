@@ -6,8 +6,10 @@ const initialProfile = {
   email: "aditya@example.com",
   college: "Tech Institute",
   department: "Information Technology",
+  domain: "Software Development",
   year: "3rd Year",
   bio: "Building confidence one speaking sprint at a time.",
+  picture: "",
 };
 
 const streakDays = [
@@ -25,6 +27,28 @@ const Profile = () => {
   const [draftProfile, setDraftProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
+
+  const handlePictureChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setSavedMessage("Please choose an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setDraftProfile((current) => ({ ...current, picture: reader.result }));
+      setSavedMessage("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePicture = () => {
+    setDraftProfile((current) => ({ ...current, picture: "" }));
+    setSavedMessage("");
+  };
 
   const updateDraft = (event) => {
     const { name, value } = event.target;
@@ -72,21 +96,39 @@ const Profile = () => {
 
       <div className="ss-profile-layout">
         <article className="ss-profile-identity-panel">
-          <div className="ss-profile-avatar" aria-hidden="true">
-            <svg viewBox="0 0 96 96" fill="none">
-              <rect width="96" height="96" rx="18" fill="#C7D2FE" />
-              <circle cx="48" cy="36" r="20" fill="#FBBF24" />
-              <path d="M29 34c3-14 35-17 39 0-4-7-11-10-20-10-8 0-15 3-19 10Z" fill="#1F2937" />
-              <circle cx="41" cy="37" r="2" fill="#1F2937" />
-              <circle cx="55" cy="37" r="2" fill="#1F2937" />
-              <path d="M43 47c3 3 7 3 10 0" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" />
-              <path d="M21 88c1-18 11-28 27-28s26 10 27 28" fill="#3B82F6" />
-              <path d="m41 61 7 10 7-10" fill="#fff" />
-            </svg>
+          <div className="ss-profile-avatar" aria-label="Profile picture">
+            {(isEditing ? draftProfile.picture : profile.picture) ? (
+              <img src={isEditing ? draftProfile.picture : profile.picture} alt={`${profile.name} profile`} />
+            ) : (
+              <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
+                <rect width="96" height="96" rx="18" fill="#C7D2FE" />
+                <circle cx="48" cy="36" r="20" fill="#FBBF24" />
+                <path d="M29 34c3-14 35-17 39 0-4-7-11-10-20-10-8 0-15 3-19 10Z" fill="#1F2937" />
+                <circle cx="41" cy="37" r="2" fill="#1F2937" />
+                <circle cx="55" cy="37" r="2" fill="#1F2937" />
+                <path d="M43 47c3 3 7 3 10 0" stroke="#1F2937" strokeWidth="2" strokeLinecap="round" />
+                <path d="M21 88c1-18 11-28 27-28s26 10 27 28" fill="#3B82F6" />
+                <path d="m41 61 7 10 7-10" fill="#fff" />
+              </svg>
+            )}
           </div>
           <h2>{profile.name}</h2>
           <p>{profile.email}</p>
           <span className="ss-profile-member-label">Member since May 2024</span>
+          {isEditing && (
+            <div className="ss-profile-picture-actions">
+              <label className="ss-profile-picture-button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                {draftProfile.picture ? "Change picture" : "Add picture"}
+                <input type="file" accept="image/*" onChange={handlePictureChange} />
+              </label>
+              {draftProfile.picture && (
+                <button type="button" className="ss-profile-picture-remove" onClick={removePicture}>Remove</button>
+              )}
+            </div>
+          )}
         </article>
 
         <form className="ss-profile-details-panel" onSubmit={saveProfile}>
@@ -114,6 +156,10 @@ const Profile = () => {
             <label>
               Department
               <input name="department" value={isEditing ? draftProfile.department : profile.department} onChange={updateDraft} readOnly={!isEditing} />
+            </label>
+            <label>
+              Domain
+              <input name="domain" value={isEditing ? draftProfile.domain : profile.domain} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               Year
