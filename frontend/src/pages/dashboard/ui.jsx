@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import History from "../history";
 import Analytics from "../analytics";
+import Leaderboard from "../leaderboard/ui";
+import Achievements from "../achievements/ui";
+import Profile from "../profile/ui";
 import "./design.css";
 
 const Dashboard = () => {
@@ -261,6 +264,7 @@ const Dashboard = () => {
             className={`ss-nav-item ${activeNav === "Dashboard" ? "active" : ""}`}
             onClick={() => setActiveNav("Dashboard")}
           >
+            {/* Start Challenge tab removed */}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="9" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
               <rect x="14" y="3" width="7" height="5" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
@@ -268,22 +272,6 @@ const Dashboard = () => {
               <rect x="3" y="16" width="7" height="5" rx="1.5" fill={activeNav === "Dashboard" ? "currentColor" : "none"} />
             </svg>
             <span>Dashboard</span>
-          </button>
-
-          {/* Start Challenge */}
-          <button
-            type="button"
-            className={`ss-nav-item ${activeNav === "Start Challenge" ? "active" : ""}`}
-            onClick={() => {
-              setActiveNav("Start Challenge");
-              startChallengeSession();
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span>Start Challenge</span>
           </button>
 
           {/* History */}
@@ -372,39 +360,6 @@ const Dashboard = () => {
           </button>
         </nav>
 
-        {/* 7 DAY STREAK CARD */}
-        <div className="ss-streak-card">
-          <div className="ss-streak-header">
-            <span className="ss-streak-title">🔥 7 Day Streak</span>
-          </div>
-          <p className="ss-streak-sub">Keep it up!</p>
-          <div className="ss-streak-dots-row">
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-            <span className="ss-streak-dot active" />
-          </div>
-
-          {/* Party popper horn vector art */}
-          <div className="ss-streak-horn-art">
-            <svg width="38" height="38" viewBox="0 0 48 48" fill="none">
-              <path d="M14 34L28 20L34 26L20 40L14 34Z" fill="url(#hornGrad)" />
-              <path d="M28 20L36 12C38 10 42 10 42 14C42 18 38 22 34 26L28 20Z" fill="#FFB020" />
-              <circle cx="38" cy="10" r="3" fill="#EC4899" />
-              <circle cx="44" cy="22" r="2.5" fill="#8B5CF6" />
-              <circle cx="30" cy="8" r="2" fill="#3B82F6" />
-              <path d="M14 34C11 37 8 38 6 42C10 40 11 37 14 34Z" fill="#F59E0B" />
-              <defs>
-                <linearGradient id="hornGrad" x1="14" y1="34" x2="34" y2="20" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#F59E0B" />
-                  <stop offset="1" stopColor="#EF4444" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-        </div>
-
         {/* USER PROFILE CARD */}
         <div className="ss-user-card" onClick={() => setActiveNav("Profile")}>
           <div className="ss-user-avatar">
@@ -439,6 +394,12 @@ const Dashboard = () => {
           />
         ) : activeNav === "Analytics" ? (
           <Analytics />
+        ) : activeNav === "Leaderboard" ? (
+          <Leaderboard />
+        ) : activeNav === "Achievements" ? (
+          <Achievements />
+        ) : activeNav === "Profile" ? (
+          <Profile />
         ) : (
           <>
             {/* ==================== HEADER ROW ==================== */}

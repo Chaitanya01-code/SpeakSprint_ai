@@ -1,0 +1,445 @@
+/* ==========================================================================
+   SpeakSprint AI - Leaderboard Page Stylesheet (leaderboard.css)
+   ========================================================================== */
+
+:root {
+  --ss-primary: #5D5FEF;
+  --ss-primary-hover: #4E50E6;
+  --ss-primary-light: #ECEEFE;
+  --ss-primary-glow: rgba(93, 95, 239, 0.25);
+  
+  --ss-bg-app: #F7F8FC;
+  --ss-bg-card: #FFFFFF;
+  --ss-bg-card-subtle: #F8F9FD;
+  
+  --ss-text-heading: #1C2033;
+  --ss-text-body: #58627A;
+  --ss-text-muted: #8E98B0;
+  
+  --ss-border-main: #EEF1F8;
+  --ss-border-light: #F4F6FB;
+  
+  --ss-success: #10B981;
+  --ss-success-bg: #E8F8F0;
+  --ss-warning: #F59E0B;
+  --ss-warning-bg: #FEF3C7;
+  --ss-info: #3B82F6;
+  --ss-info-bg: #EFF6FF;
+  --ss-purple-bg: #F3F0FF;
+  
+  --ss-radius-sm: 8px;
+  --ss-radius-md: 14px;
+  --ss-radius-lg: 20px;
+  --ss-radius-xl: 24px;
+  
+  --ss-shadow-card: 0 2px 10px rgba(28, 32, 51, 0.03);
+  --ss-shadow-card-hover: 0 10px 24px rgba(28, 32, 51, 0.07);
+  --ss-shadow-primary: 0 8px 20px rgba(93, 95, 239, 0.28);
+  
+  --ss-font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ss-font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  
+  --ss-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Leaderboard Page Container Layout */
+.ss-leaderboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   1. MAIN LEADERBOARD CARD
+   ========================================================================== */
+.ss-leaderboard-card {
+  background: var(--ss-bg-card);
+  border: 1px solid var(--ss-border-main);
+  border-radius: var(--ss-radius-xl);
+  padding: 24px 28px 24px 28px;
+  box-shadow: var(--ss-shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: var(--ss-transition);
+}
+
+/* Header (Title + Timeframe Dropdown) */
+.ss-leaderboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ss-leaderboard-title {
+  font-family: var(--ss-font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.ss-timeframe-dropdown-wrap {
+  position: relative;
+}
+
+.ss-timeframe-btn {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 9px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--ss-transition);
+}
+
+.ss-timeframe-btn:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: var(--ss-text-heading);
+}
+
+.ss-timeframe-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #FFFFFF;
+  border: 1px solid #EEF1F8;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  min-width: 130px;
+  z-index: 50;
+  overflow: hidden;
+  animation: ssFadeIn 0.15s ease-out;
+}
+
+.ss-timeframe-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ss-text-body);
+  cursor: pointer;
+  transition: var(--ss-transition);
+}
+
+.ss-timeframe-item:hover {
+  background: #F4F5FD;
+  color: var(--ss-primary);
+}
+
+.ss-timeframe-item.active {
+  background: #EEF0FE;
+  color: var(--ss-primary);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   2. SCOPE FILTER PILL TABS
+   ========================================================================== */
+.ss-scope-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ss-scope-tab-btn {
+  padding: 8px 22px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--ss-transition);
+  border: 1px solid var(--ss-border-main);
+  background: #FFFFFF;
+  color: #64748B;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ss-scope-tab-btn:hover {
+  background: #F8F9FE;
+  color: var(--ss-text-heading);
+  border-color: #CBD5E1;
+}
+
+.ss-scope-tab-btn.active {
+  background: linear-gradient(135deg, #5D5FEF 0%, #6E5DF8 100%);
+  border-color: var(--ss-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(93, 95, 239, 0.32);
+}
+
+/* ==========================================================================
+   3. LEADERBOARD RANKING LIST / TABLE
+   ========================================================================== */
+.ss-ranking-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.ss-ranking-header-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 100px 90px;
+  align-items: center;
+  padding: 0 16px 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94A3B8;
+  letter-spacing: 0.2px;
+}
+
+.ss-col-score {
+  text-align: center;
+}
+
+.ss-col-streak {
+  text-align: right;
+}
+
+.ss-ranking-item-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 100px 90px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--ss-radius-md);
+  background: #FFFFFF;
+  border: 1px solid transparent;
+  transition: var(--ss-transition);
+  cursor: pointer;
+}
+
+.ss-ranking-item-row:hover {
+  background: #F8F9FE;
+  border-color: #EEF1F8;
+  transform: translateX(2px);
+}
+
+/* Highlighted Current User Row (Aditya Sharma (You)) */
+.ss-ranking-item-row.current-user {
+  background: #F4F5FD;
+  border: 1px solid #E0E4FB;
+  box-shadow: 0 2px 8px rgba(93, 95, 239, 0.06);
+}
+
+.ss-ranking-item-row.current-user:hover {
+  background: #ECEFFE;
+}
+
+/* Rank Number Badge */
+.ss-rank-number {
+  font-family: var(--ss-font-display);
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+}
+
+.ss-ranking-item-row:nth-child(2) .ss-rank-number {
+  color: #D97706; /* 1st Gold tone */
+}
+
+/* User Info Box */
+.ss-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ss-user-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #E2E8F0;
+  flex-shrink: 0;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.ss-user-name-text {
+  font-family: var(--ss-font-main);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ss-text-heading);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ss-user-badge-you {
+  color: var(--ss-primary);
+  font-weight: 700;
+}
+
+/* Score Typography */
+.ss-score-text {
+  font-family: var(--ss-font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ss-text-heading);
+  text-align: center;
+}
+
+/* Streak Typography */
+.ss-streak-text {
+  font-family: var(--ss-font-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #64748B;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* ==========================================================================
+   4. BOTTOM FULL-WIDTH ACTION BUTTON
+   ========================================================================== */
+.ss-btn-view-full {
+  width: 100%;
+  background: linear-gradient(135deg, #5D5FEF 0%, #6E5DF8 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--ss-radius-md);
+  padding: 14px 20px;
+  font-family: var(--ss-font-display);
+  font-size: 14.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--ss-transition);
+  box-shadow: 0 6px 18px rgba(93, 95, 239, 0.32);
+  margin-top: 6px;
+}
+
+.ss-btn-view-full:hover {
+  background: linear-gradient(135deg, #4E50E6 0%, #5D4FE5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(93, 95, 239, 0.4);
+}
+
+/* ==========================================================================
+   5. EXPANDED PODIUM & STATS (Optional Full View State)
+   ========================================================================== */
+.ss-podium-section {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.ss-podium-card {
+  background: #FAFBFE;
+  border: 1px solid var(--ss-border-main);
+  border-radius: var(--ss-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  position: relative;
+}
+
+.ss-podium-card.first {
+  background: linear-gradient(180deg, #FEF9C3 0%, #FFFFFF 100%);
+  border-color: #FDE047;
+  transform: scale(1.04);
+  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.15);
+}
+
+.ss-podium-badge-icon {
+  font-size: 24px;
+}
+
+/* Modal for user profile stats */
+.ss-user-detail-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: ssFadeIn 0.2s ease-out;
+}
+
+.ss-user-detail-modal {
+  background: #FFFFFF;
+  border-radius: var(--ss-radius-xl);
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: ssScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ssFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ssScaleUp {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Styles */
+@media (max-width: 680px) {
+  .ss-leaderboard-card {
+    padding: 18px 16px;
+  }
+  .ss-ranking-header-row,
+  .ss-ranking-item-row {
+    grid-template-columns: 45px 1fr 65px 65px;
+    padding: 10px 10px;
+  }
+  .ss-user-avatar-circle {
+    width: 32px;
+    height: 32px;
+  }
+  .ss-user-name-text {
+    font-size: 13px;
+  }
+  .ss-score-text {
+    font-size: 14.5px;
+  }
+  .ss-streak-text {
+    font-size: 13px;
+  }
+}
