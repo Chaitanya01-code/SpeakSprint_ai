@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth
-from app.core.database import initialize_admin_user
+from app.models import topic
+from app.core.userdb import initialize_admin_user
 
 app = FastAPI()
 
@@ -11,7 +12,9 @@ app = FastAPI()
 async def startup_event():
     initialize_admin_user()
 
+# Include routers
 app.include_router(auth.router)
+app.include_router(topic.router)
 
 app.add_middleware(
     CORSMiddleware,
