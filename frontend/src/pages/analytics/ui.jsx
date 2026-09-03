@@ -85,7 +85,11 @@ const Analytics = () => {
     },
   };
 
-  const currentData = analyticsDataSets[timeframe] || analyticsDataSets["This Month"];
+  const currentData = {
+    metrics: { avgScore: null, challenges: null, speakingTime: null, bestScore: null },
+    trendPoints: [],
+    skills: [],
+  };
 
   // Radar chart geometry calculations
   const radarCenter = { x: 135, y: 110 };
@@ -187,6 +191,7 @@ const Analytics = () => {
         </div>
 
         <div className="ss-trend-chart-container">
+          {currentData.trendPoints.length === 0 && <div style={{ padding: "100px 0", textAlign: "center" }}>null</div>}
           <svg viewBox="0 0 660 250" className="ss-trend-svg" preserveAspectRatio="none">
             <line x1="25" y1="220" x2="635" y2="220" className="ss-trend-axis-line" />
 
@@ -228,6 +233,7 @@ const Analytics = () => {
         <div className="ss-skills-content-grid">
           {/* Left: Hexagonal Radar Chart */}
           <div className="ss-radar-wrap">
+            {currentData.skills.length === 0 && <div style={{ padding: "100px 0", textAlign: "center" }}>null</div>}
             <svg viewBox="0 0 270 230" className="ss-radar-svg-analytics">
               {/* Concentric Hexagons */}
               {hexagonLevels.map((lvl, lvlIdx) => {
@@ -316,7 +322,7 @@ const Analytics = () => {
 
           {/* Right: Horizontal Skill Progress Bars */}
           <div className="ss-progress-list">
-            {currentData.skills.map((skill) => (
+            {currentData.skills.length === 0 ? <div style={{ padding: "100px 0", textAlign: "center" }}>null</div> : currentData.skills.map((skill) => (
               <div key={skill.name} className="ss-progress-item">
                 <span className="ss-progress-name">{skill.name}</span>
                 <div className="ss-progress-track">

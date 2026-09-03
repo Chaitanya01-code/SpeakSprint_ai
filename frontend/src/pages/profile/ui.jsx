@@ -1,28 +1,21 @@
 import React, { useState } from "react";
 import "./profile.css";
 
-const initialProfile = {
-  name: "Aditya Sharma",
-  email: "aditya@example.com",
-  college: "Tech Institute",
-  department: "Information Technology",
-  domain: "Software Development",
-  year: "3rd Year",
-  bio: "Building confidence one speaking sprint at a time.",
+const createInitialProfile = (authUser) => ({
+  name: authUser?.username || null,
+  email: authUser?.email || null,
+  college: null,
+  department: null,
+  domain: authUser?.domain || null,
+  year: null,
+  bio: null,
   picture: "",
-};
+});
 
-const streakDays = [
-  { day: "Mon", date: "13", active: true },
-  { day: "Tue", date: "14", active: true },
-  { day: "Wed", date: "15", active: true },
-  { day: "Thu", date: "16", active: true },
-  { day: "Fri", date: "17", active: true },
-  { day: "Sat", date: "18", active: false },
-  { day: "Sun", date: "19", active: false },
-];
+const streakDays = [];
 
-const Profile = () => {
+const Profile = ({ authUser }) => {
+  const initialProfile = createInitialProfile(authUser);
   const [profile, setProfile] = useState(initialProfile);
   const [draftProfile, setDraftProfile] = useState(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
@@ -112,9 +105,9 @@ const Profile = () => {
               </svg>
             )}
           </div>
-          <h2>{profile.name}</h2>
-          <p>{profile.email}</p>
-          <span className="ss-profile-member-label">Member since May 2024</span>
+          <h2>{profile.name ?? "null"}</h2>
+          <p>{profile.email ?? "null"}</p>
+          <span className="ss-profile-member-label">Member since {authUser?.created_at || "null"}</span>
           {isEditing && (
             <div className="ss-profile-picture-actions">
               <label className="ss-profile-picture-button">
@@ -143,23 +136,23 @@ const Profile = () => {
           <div className="ss-profile-fields">
             <label>
               Full name
-              <input name="name" value={isEditing ? draftProfile.name : profile.name} onChange={updateDraft} readOnly={!isEditing} />
+              <input name="name" value={(isEditing ? draftProfile.name : profile.name) ?? "null"} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               Email address
-              <input type="email" name="email" value={isEditing ? draftProfile.email : profile.email} onChange={updateDraft} readOnly={!isEditing} />
+              <input type="email" name="email" value={(isEditing ? draftProfile.email : profile.email) ?? "null"} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               College
-              <input name="college" value={isEditing ? draftProfile.college : profile.college} onChange={updateDraft} readOnly={!isEditing} />
+              <input name="college" value={(isEditing ? draftProfile.college : profile.college) ?? "null"} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               Department
-              <input name="department" value={isEditing ? draftProfile.department : profile.department} onChange={updateDraft} readOnly={!isEditing} />
+              <input name="department" value={(isEditing ? draftProfile.department : profile.department) ?? "null"} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               Domain
-              <input name="domain" value={isEditing ? draftProfile.domain : profile.domain} onChange={updateDraft} readOnly={!isEditing} />
+              <input name="domain" value={(isEditing ? draftProfile.domain : profile.domain) ?? "null"} onChange={updateDraft} readOnly={!isEditing} />
             </label>
             <label>
               Year
@@ -172,7 +165,7 @@ const Profile = () => {
             </label>
             <label className="ss-profile-bio-field">
               About you
-              <textarea name="bio" value={isEditing ? draftProfile.bio : profile.bio} onChange={updateDraft} readOnly={!isEditing} rows="3" />
+              <textarea name="bio" value={(isEditing ? draftProfile.bio : profile.bio) ?? "null"} onChange={updateDraft} readOnly={!isEditing} rows="3" />
             </label>
           </div>
 
@@ -191,12 +184,12 @@ const Profile = () => {
             <p className="ss-profile-page-eyebrow">Consistency pays off</p>
             <h2 id="streaks-title">Maintained streaks</h2>
           </div>
-          <span className="ss-streaks-fire" aria-label="Current 7 day streak">7 days</span>
+          <span className="ss-streaks-fire" aria-label="Current streak">null</span>
         </div>
         <div className="ss-streak-stats">
-          <div><strong>7</strong><span>Current streak</span></div>
-          <div><strong>12</strong><span>Best streak</span></div>
-          <div><strong>28</strong><span>Practice days</span></div>
+          <div><strong>null</strong><span>Current streak</span></div>
+          <div><strong>null</strong><span>Best streak</span></div>
+          <div><strong>null</strong><span>Practice days</span></div>
         </div>
         <div className="ss-streak-week" aria-label="Speaking activity for the current week">
           {streakDays.map((item) => (

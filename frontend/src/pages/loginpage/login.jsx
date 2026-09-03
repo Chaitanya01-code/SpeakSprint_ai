@@ -44,8 +44,7 @@ const Login = () => {
         } else {
           localStorage.removeItem("rememberedLogin");
         }
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
+        window.location.href = data.is_admin ? "/admin" : "/dashboard";
       } else {
         setError(data.detail || data.message || "Login failed. Please try again.");
       }

@@ -26,14 +26,14 @@ function App() {
   if (path === "/history") {
     return (
       <div style={{ minHeight: "100vh", background: "#F7F8FC", padding: "24px 32px" }}>
-        <History />
+        <History authUser={authUser} />
       </div>
     );
   }
   if (path === "/analytics") {
     return (
       <div style={{ minHeight: "100vh", background: "#F7F8FC", padding: "24px 32px" }}>
-        <Analytics />
+        <Analytics authUser={authUser} />
       </div>
     );
   }

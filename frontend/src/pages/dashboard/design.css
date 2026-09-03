@@ -8,15 +8,15 @@
   --ss-primary-light: #ECEEFE;
   --ss-primary-glow: rgba(93, 95, 239, 0.25);
   
-  --ss-bg-app: #F7F8FC;
+  --ss-bg-app: #F8FAFF;
   --ss-bg-card: #FFFFFF;
   --ss-bg-card-subtle: #F8F9FD;
   
-  --ss-text-heading: #1C2033;
-  --ss-text-body: #58627A;
-  --ss-text-muted: #8E98B0;
+  --ss-text-heading: #172033;
+  --ss-text-body: #67748A;
+  --ss-text-muted: #78849A;
   
-  --ss-border-main: #EEF1F8;
+  --ss-border-main: #E9EDF4;
   --ss-border-light: #F4F6FB;
   
   --ss-success: #10B981;
@@ -27,17 +27,17 @@
   --ss-info-bg: #EFF6FF;
   --ss-purple-bg: #F3F0FF;
   
-  --ss-radius-sm: 8px;
-  --ss-radius-md: 14px;
-  --ss-radius-lg: 20px;
-  --ss-radius-xl: 24px;
+  --ss-radius-sm: 5px;
+  --ss-radius-md: 8px;
+  --ss-radius-lg: 8px;
+  --ss-radius-xl: 8px;
   
   --ss-shadow-card: 0 2px 10px rgba(28, 32, 51, 0.03);
   --ss-shadow-card-hover: 0 10px 24px rgba(28, 32, 51, 0.07);
   --ss-shadow-primary: 0 8px 20px rgba(93, 95, 239, 0.28);
   
-  --ss-font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --ss-font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --ss-font-main: Inter, 'Segoe UI', sans-serif;
+  --ss-font-display: Inter, 'Segoe UI', sans-serif;
   
   --ss-transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -47,14 +47,14 @@
    ========================================================================== */
 .ss-dashboard-wrapper {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   background-color: var(--ss-bg-app);
   color: var(--ss-text-heading);
   font-family: var(--ss-font-main);
   box-sizing: border-box;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .ss-dashboard-wrapper *,
@@ -67,13 +67,13 @@
    SIDEBAR
    ========================================================================== */
 .ss-sidebar {
-  width: 246px;
-  min-width: 246px;
-  background: var(--ss-bg-card);
-  border-right: 1px solid var(--ss-border-main);
+  width: 190px;
+  min-width: 190px;
+  background: #0B1630;
+  border-right: 0;
   display: flex;
   flex-direction: column;
-  padding: 24px 16px 20px 16px;
+  padding: 15px 13px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -129,10 +129,10 @@
 
 .ss-logo-text {
   font-family: var(--ss-font-display);
-  font-size: 19px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: -0.3px;
-  color: var(--ss-text-heading);
+  color: #F7F9FF;
 }
 
 .ss-logo-text span {
@@ -151,12 +151,12 @@
 .ss-nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ss-text-body);
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9EABC4;
   background: transparent;
   border: none;
   width: 100%;
@@ -166,14 +166,14 @@
 }
 
 .ss-nav-item:hover {
-  color: var(--ss-primary);
-  background: #F5F6FE;
+  color: #FFFFFF;
+  background: #172650;
 }
 
 .ss-nav-item.active {
-  background: var(--ss-primary);
+  background: linear-gradient(100deg, #5944DB, #7049DC);
   color: #FFFFFF;
-  box-shadow: 0 6px 16px rgba(93, 95, 239, 0.32);
+  box-shadow: 0 5px 12px #070E27;
 }
 
 .ss-nav-item svg {
@@ -253,8 +253,8 @@
   align-items: center;
   gap: 11px;
   padding: 9px 10px;
-  background: #FAFBFF;
-  border: 1px solid var(--ss-border-main);
+  background: #132242;
+  border: 1px solid #223354;
   border-radius: var(--ss-radius-md);
   cursor: pointer;
   transition: var(--ss-transition);
@@ -262,8 +262,8 @@
 }
 
 .ss-user-card:hover {
-  background: #F1F4FD;
-  border-color: #DDE4F6;
+  background: #172650;
+  border-color: #2D4270;
 }
 
 .ss-user-avatar {
@@ -296,7 +296,7 @@
 .ss-user-name {
   font-size: 13px;
   font-weight: 700;
-  color: var(--ss-text-heading);
+  color: #ECF2FF;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -304,7 +304,7 @@
 
 .ss-user-email {
   font-size: 11px;
-  color: var(--ss-text-muted);
+  color: #8E9AB3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -315,13 +315,15 @@
    ========================================================================== */
 .ss-main-content {
   flex: 1;
-  padding: 24px 32px 36px 32px;
-  max-width: 1380px;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 23px 20px 30px;
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 /* Header Row */
@@ -1187,6 +1189,15 @@
   cursor: pointer;
 }
 
+.ss-mobile-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ss-sidebar-overlay {
+  display: none;
+}
+
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
@@ -1219,6 +1230,15 @@
   }
   .ss-sidebar.open {
     transform: translateX(260px);
+  }
+  .ss-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    border: 0;
+    background: rgba(11, 22, 48, 0.35);
+    cursor: pointer;
   }
   .ss-mobile-toggle {
     display: flex;

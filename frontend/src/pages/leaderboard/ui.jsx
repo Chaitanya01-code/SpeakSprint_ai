@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./leaderboard.css";
 
-const Leaderboard = () => {
+  const Leaderboard = () => {
   // Timeframe selector state
   const [timeframe, setTimeframe] = useState("This Week");
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
@@ -295,7 +295,7 @@ const Leaderboard = () => {
     { id: "top-speaker", title: "Top Speaker", unlocked: "May 14, 2024", desc: "Scored 90+ points across multiple speech challenges", type: "speaker" },
     { id: "grammar-master", title: "Grammar Master", unlocked: "May 15, 2024", desc: "Achieved 95%+ grammatical precision in assessments", type: "grammar" },
   ];
-  const currentRankings = rankingDatasets[activeScope] || rankingDatasets.All;
+  const currentRankings = [];
   const displayedRankings = isExpanded ? currentRankings : currentRankings.slice(0, 5);
 
   // Render Illustrated Avatar corresponding to gender/type
@@ -415,7 +415,7 @@ const Leaderboard = () => {
           </div>
 
           {/* Table Rows matching screenshot */}
-          {displayedRankings.map((user) => (
+          {displayedRankings.length === 0 ? <div style={{ padding: "24px", textAlign: "center" }}>null</div> : displayedRankings.map((user) => (
             <div
               key={user.rank}
               className={`ss-ranking-item-row ${user.isCurrentUser ? "current-user" : ""}`}

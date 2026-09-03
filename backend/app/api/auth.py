@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 import bcrypt
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -64,37 +64,27 @@ async def register(credentials: AuthRequest, db: Session = Depends(get_db)):
 
 @router.post("/login")
 async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
-    """Login user with email or admin with username"""
+    """Login an active user by email or username."""
     if len(credentials.password) < 6:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Admin login using username
-    if credentials.username:
-        user = db.scalar(select(User).where(User.username == credentials.username))
-        if not user or not user.is_admin:
-            raise HTTPException(status_code=401, detail="Invalid admin credentials")
-        
-        password_matches = bcrypt.checkpw(
-            credentials.password.encode("utf-8"),
-            user.password_hash.encode("utf-8"),
+    if credentials.email:
+        user = db.scalar(
+            select(User).where(
+                User.email == credentials.email.strip().lower(),
+                User.is_active.is_(True),
+            )
         )
-        if not password_matches:
-            raise HTTPException(status_code=401, detail="Invalid admin credentials")
-        
-        return {
-            "message": "Admin signed in successfully",
-            "user_id": user.id,
-            "is_admin": True,
-            "username": user.username,
-            "domain": user.domain,
-        }
-
-    # Regular user login using email
-    if not credentials.email:
-        raise HTTPException(status_code=401, detail="Email is required")
-
-    email = credentials.email.strip().lower()
-    user = db.scalar(select(User).where(User.email == email, User.is_active.is_(True)))
+    elif credentials.username:
+        username = credentials.username.strip().lower()
+        user = db.scalar(
+            select(User).where(
+                func.lower(User.username) == username,
+                User.is_active.is_(True),
+            )
+        )
+    else:
+        raise HTTPException(status_code=401, detail="Email or username is required")
 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -106,11 +96,12 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
 
     if not password_matches:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
+
     return {
-        "message": "Signed in successfully",
+        "message": "Admin signed in successfully" if user.is_admin else "Signed in successfully",
         "user_id": user.id,
-        "is_admin": False,
+        "is_admin": user.is_admin,
+        "username": user.username,
         "email": user.email,
         "domain": user.domain,
     }

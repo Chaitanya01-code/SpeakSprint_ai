@@ -330,7 +330,7 @@ const initialAttemptsData = [
 
 const History = ({ onStartChallenge, onNavigateBack }) => {
   // State
-  const [attempts, setAttempts] = useState(initialAttemptsData);
+  const [attempts, setAttempts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all"); // all, top90, strong80, review, bookmarked
   const [categoryFilter, setCategoryFilter] = useState("All Topics");
@@ -372,9 +372,9 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
 
   // Categories list
   const categories = useMemo(() => {
-    const set = new Set(initialAttemptsData.map((d) => d.category));
+    const set = new Set(attempts.map((d) => d.category));
     return ["All Topics", ...Array.from(set)];
-  }, []);
+  }, [attempts]);
 
   // Filtered & Sorted Attempts
   const filteredAttempts = useMemo(() => {
@@ -429,13 +429,13 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
 
   // Summary statistics metrics
   const averageScore = useMemo(() => {
-    if (attempts.length === 0) return 0;
+    if (attempts.length === 0) return null;
     const total = attempts.reduce((acc, curr) => acc + curr.score, 0);
     return (total / attempts.length).toFixed(1);
   }, [attempts]);
 
   const bestScore = useMemo(() => {
-    if (attempts.length === 0) return 0;
+    if (attempts.length === 0) return null;
     return Math.max(...attempts.map((a) => a.score));
   }, [attempts]);
 
@@ -458,7 +458,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
         <div className="ss-history-title-group">
           <h1 className="ss-history-title">
             Speaking History
-            <span className="ss-history-title-badge">28 Sessions Total</span>
+            <span className="ss-history-title-badge">{attempts.length || "null"} Sessions Total</span>
           </h1>
           <p className="ss-history-sub">
             Review your past 60-second speech attempts, AI coaching feedback, and metric trends.
@@ -512,9 +512,9 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">28</div>
+          <div className="ss-hmetric-value">{attempts.length || "null"}</div>
           <div className="ss-hmetric-footer positive">
-            <span>↑ 4 completed this week</span>
+            <span>{attempts.length ? "↑ 4 completed this week" : "null"}</span>
           </div>
         </div>
 
@@ -562,7 +562,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">28h 15m</div>
+          <div className="ss-hmetric-value">{attempts.length ? "28h 15m" : "null"}</div>
           <div className="ss-hmetric-footer">
             <span>Keep up the daily momentum!</span>
           </div>
@@ -752,7 +752,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
       {paginatedAttempts.length === 0 ? (
         <div className="ss-empty-history">
           <span className="ss-empty-icon">🔍</span>
-          <h3 className="ss-empty-title">No speaking sessions match your filters</h3>
+          <h3 className="ss-empty-title">null</h3>
           <p className="ss-empty-sub">
             Try adjusting your search terms, changing the category, or clearing active filters.
           </p>

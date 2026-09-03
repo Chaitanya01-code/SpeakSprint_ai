@@ -1,5 +1,6 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, inspect, text
+import os
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, inspect, or_, text
 from .database import Base, SessionLocal, create_all_tables, engine
 
 
@@ -37,19 +38,26 @@ ensure_domain_column()
 
 
 def initialize_admin_user():
-    """Create default admin user if it doesn't exist"""
+    """Create the initial admin user in the database if it does not exist."""
     from .database import get_db
     import bcrypt
-    
+
+    admin_username = os.getenv("ADMIN_USERNAME", "admin123").strip()
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@speaksprint.com").strip().lower()
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin 123")
+
     db = SessionLocal()
     try:
-        # Check if admin user already exists
-        admin_user = db.query(User).filter(User.username == "admin123").first()
+        admin_user = db.query(User).filter(
+            or_(User.username == admin_username, User.email == admin_email)
+        ).first()
         if not admin_user:
-            password_hash = bcrypt.hashpw(b"admin 123", bcrypt.gensalt()).decode("utf-8")
+            password_hash = bcrypt.hashpw(
+                admin_password.encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8")
             admin_user = User(
-                username="admin123",
-                email="admin@speaksprint.com",
+                username=admin_username,
+                email=admin_email,
                 password_hash=password_hash,
                 is_admin=True,
                 is_active=True,
@@ -57,6 +65,6 @@ def initialize_admin_user():
             )
             db.add(admin_user)
             db.commit()
-            print("Admin user created with username: admin123 and password: admin 123")
+            print(f"Admin user created: {admin_email}")
     finally:
         db.close()

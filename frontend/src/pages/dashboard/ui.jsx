@@ -6,18 +6,32 @@ import Achievements from "../achievements/ui";
 import Profile from "../profile/ui";
 import "./design.css";
 
-const Dashboard = () => {
+const Dashboard = ({ authUser }) => {
+  const userName = authUser?.username || null;
+  const userEmail = authUser?.email || null;
+  const dashboardData = {
+    averageScore: null,
+    bestScore: null,
+    challengesCompleted: null,
+    totalSpeakingTime: null,
+    weeklyProgress: null,
+    skills: null,
+    recentAttempts: null,
+    achievements: null,
+  };
+
   // Navigation active state
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleNavChange = (view) => {
+    setActiveNav(view);
+    setMobileMenuOpen(false);
+  };
+
   // Timeframe filter for weekly progress
   const [timeframe, setTimeframe] = useState("This Week");
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
-
-  // Notifications popover state
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadNotif, setUnreadNotif] = useState(1);
 
   // Challenge Practice Modal state
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
@@ -34,26 +48,7 @@ const Dashboard = () => {
   const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   // Weekly Progress Chart Data
-  const weeklyDataSets = {
-    "This Week": [
-      { day: "Mon", score: 55, x: 45, y: 155 },
-      { day: "Tue", score: 68, x: 100, y: 125 },
-      { day: "Wed", score: 63, x: 155, y: 135 },
-      { day: "Thu", score: 75, x: 210, y: 110 },
-      { day: "Fri", score: 87, x: 265, y: 80, isPeak: true },
-      { day: "Sat", score: 78, x: 320, y: 105 },
-      { day: "Sun", score: 82, x: 375, y: 95 },
-    ],
-    "Last Week": [
-      { day: "Mon", score: 50, x: 45, y: 165 },
-      { day: "Tue", score: 58, x: 100, y: 148 },
-      { day: "Wed", score: 65, x: 155, y: 130 },
-      { day: "Thu", score: 70, x: 210, y: 120 },
-      { day: "Fri", score: 74, x: 265, y: 112, isPeak: true },
-      { day: "Sat", score: 72, x: 320, y: 118 },
-      { day: "Sun", score: 76, x: 375, y: 108 },
-    ],
-  };
+  const weeklyDataSets = { "This Week": [], "Last Week": [] };
 
   const currentWeeklyData = weeklyDataSets[timeframe] || weeklyDataSets["This Week"];
   const [hoveredDataPoint, setHoveredDataPoint] = useState(
@@ -79,14 +74,7 @@ const Dashboard = () => {
   };
 
   // Skill Overview Radar Chart Geometry (6 Axes matching image)
-  const radarSkills = [
-    { name: "Fluency", user: 88, avg: 72, angle: -90 },
-    { name: "Grammar", user: 82, avg: 68, angle: -30 },
-    { name: "Vocabulary", user: 78, avg: 70, angle: 30 },
-    { name: "Pronunciation", user: 86, avg: 65, angle: 90 },
-    { name: "Confidence", user: 92, avg: 60, angle: 150 },
-    { name: "Topic Relevance", user: 84, avg: 75, angle: 210 },
-  ];
+  const radarSkills = [];
 
   const radarCenter = { x: 120, y: 95 };
   const radarRadius = 62;
@@ -119,80 +107,10 @@ const Dashboard = () => {
   const hexagonLevels = [0.25, 0.5, 0.75, 1.0];
 
   // Recent attempts data matching the screenshot
-  const recentAttempts = [
-    {
-      id: 1,
-      title: "The Future of AI",
-      date: "May 16, 2024",
-      score: 88,
-      status: "green",
-      wpm: 138,
-      clarity: "92%",
-      feedback: "Excellent vocabulary and articulate flow. Pacing was very engaging.",
-    },
-    {
-      id: 2,
-      title: "Impact of Social Media",
-      date: "May 15, 2024",
-      score: 78,
-      status: "orange",
-      wpm: 120,
-      clarity: "81%",
-      feedback: "Strong logical arguments. Work on reducing conversational filler words.",
-    },
-    {
-      id: 3,
-      title: "Online Education",
-      date: "May 14, 2024",
-      score: 92,
-      status: "green",
-      wpm: 145,
-      clarity: "95%",
-      feedback: "Outstanding confidence, structured cadence, and crisp pronunciation!",
-    },
-    {
-      id: 4,
-      title: "Sustainable Living",
-      date: "May 13, 2024",
-      score: 85,
-      status: "green",
-      wpm: 132,
-      clarity: "88%",
-      feedback: "Well-crafted points with clear examples. Natural transition phrasing.",
-    },
-  ];
+  const recentAttempts = [];
 
   // Achievements data matching the screenshot
-  const achievements = [
-    {
-      id: "first-challenge",
-      title: "First Challenge",
-      unlocked: "May 10, 2024",
-      desc: "Completed your first 60-second speaking sprint",
-      type: "first",
-    },
-    {
-      id: "streak-7",
-      title: "7-Day Streak",
-      unlocked: "May 16, 2024",
-      desc: "Practiced speaking consistently for 7 days in a row",
-      type: "streak",
-    },
-    {
-      id: "top-speaker",
-      title: "Top Speaker",
-      unlocked: "May 14, 2024",
-      desc: "Scored 90+ points across multiple speech challenges",
-      type: "speaker",
-    },
-    {
-      id: "grammar-master",
-      title: "Grammar Master",
-      unlocked: "May 15, 2024",
-      desc: "Achieved 95%+ grammatical precision in assessments",
-      type: "grammar",
-    },
-  ];
+  const achievements = [];
 
   // Practice Simulation Timer
   useEffect(() => {
@@ -243,7 +161,7 @@ const Dashboard = () => {
       ==================================================================== */}
       <aside className={`ss-sidebar ${mobileMenuOpen ? "open" : ""}`}>
         {/* LOGO */}
-        <div className="ss-logo" onClick={() => setActiveNav("Dashboard")}>
+        <div className="ss-logo" onClick={() => handleNavChange("Dashboard")}>
           <div className="ss-logo-icon">
             <span className="ss-wave-bar" />
             <span className="ss-wave-bar" />
@@ -262,7 +180,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Dashboard" ? "active" : ""}`}
-            onClick={() => setActiveNav("Dashboard")}
+            onClick={() => handleNavChange("Dashboard")}
           >
             {/* Start Challenge tab removed */}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -278,7 +196,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "History" ? "active" : ""}`}
-            onClick={() => setActiveNav("History")}
+            onClick={() => handleNavChange("History")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -293,7 +211,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Analytics" ? "active" : ""}`}
-            onClick={() => setActiveNav("Analytics")}
+            onClick={() => handleNavChange("Analytics")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10" />
@@ -307,7 +225,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Leaderboard" ? "active" : ""}`}
-            onClick={() => setActiveNav("Leaderboard")}
+            onClick={() => handleNavChange("Leaderboard")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
@@ -324,7 +242,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Achievements" ? "active" : ""}`}
-            onClick={() => setActiveNav("Achievements")}
+            onClick={() => handleNavChange("Achievements")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="8" r="6" />
@@ -337,7 +255,7 @@ const Dashboard = () => {
           <button
             type="button"
             className={`ss-nav-item ${activeNav === "Profile" ? "active" : ""}`}
-            onClick={() => setActiveNav("Profile")}
+            onClick={() => handleNavChange("Profile")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -349,103 +267,67 @@ const Dashboard = () => {
         </nav>
 
         {/* USER PROFILE CARD */}
-        <div className="ss-user-card" onClick={() => setActiveNav("Profile")}>
+        <div className="ss-user-card" onClick={() => handleNavChange("Profile")}>
           <div className="ss-user-avatar">
-            <svg viewBox="0 0 64 64" fill="none" width="100%" height="100%">
-              <rect width="64" height="64" fill="#C7D2FE" />
-              {/* Aditya face portrait illustration */}
-              <circle cx="32" cy="24" r="13" fill="#374151" />
-              <circle cx="32" cy="25" r="11" fill="#FBBF24" />
-              <path d="M22 22C24 16 40 16 42 22C42 22 41 14 32 14C23 14 22 22 22 22Z" fill="#1F2937" />
-              <circle cx="28" cy="24" r="1.5" fill="#1F2937" />
-              <circle cx="36" cy="24" r="1.5" fill="#1F2937" />
-              <path d="M29 29C31 31 33 31 35 29" stroke="#1F2937" strokeWidth="1.2" strokeLinecap="round" />
-              <path d="M14 54C14 43 22 38 32 38C42 38 50 43 50 54" fill="#3B82F6" />
-              <path d="M27 38L32 45L37 38" fill="#FFFFFF" />
-            </svg>
+            null
           </div>
           <div className="ss-user-info">
-            <span className="ss-user-name">Aditya Sharma</span>
-            <span className="ss-user-email">aditya@example.com</span>
+            <span className="ss-user-name">{userName === null ? "null" : userName}</span>
+            <span className="ss-user-email">{userEmail === null ? "null" : userEmail}</span>
           </div>
         </div>
       </aside>
+
+      {mobileMenuOpen && (
+        <button
+          type="button"
+          className="ss-sidebar-overlay"
+          aria-label="Close navigation menu"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       {/* ====================================================================
           MAIN DASHBOARD AREA
       ==================================================================== */}
       <main className="ss-main-content">
+        <button
+          type="button"
+          className="ss-mobile-toggle"
+          aria-label="Open navigation menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
         {activeNav === "History" ? (
           <History
+            authUser={authUser}
             onStartChallenge={startChallengeSession}
             onNavigateBack={() => setActiveNav("Dashboard")}
           />
         ) : activeNav === "Analytics" ? (
-          <Analytics />
+          <Analytics authUser={authUser} />
         ) : activeNav === "Leaderboard" ? (
-          <Leaderboard />
+          <Leaderboard authUser={authUser} />
         ) : activeNav === "Achievements" ? (
-          <Achievements />
+          <Achievements authUser={authUser} />
         ) : activeNav === "Profile" ? (
-          <Profile />
+          <Profile authUser={authUser} />
         ) : (
           <>
             {/* ==================== HEADER ROW ==================== */}
             <header className="ss-header-row">
           <div className="ss-greeting-box">
             <h1 className="ss-greeting-title">
-              Good morning, Aditya! <span role="img" aria-label="wave">👋</span>
+              Good morning, {userName === null ? "null" : userName}! <span role="img" aria-label="wave">👋</span>
             </h1>
             <p className="ss-greeting-sub">Ready to improve your communication skills today?</p>
           </div>
 
           <div className="ss-header-actions">
-            {/* Notification Bell */}
-            <div style={{ position: "relative" }}>
-              <button
-                type="button"
-                className="ss-notification-btn"
-                onClick={() => setShowNotifications(!showNotifications)}
-                aria-label="Notifications"
-              >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-                {unreadNotif > 0 && <span className="ss-notification-badge">{unreadNotif}</span>}
-              </button>
-
-              {/* Notifications Popover */}
-              {showNotifications && (
-                <div className="ss-notifications-popover">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #EEF1F8", paddingBottom: "8px" }}>
-                    <span style={{ fontWeight: "700", fontSize: "13px" }}>Notifications</span>
-                    <button
-                      type="button"
-                      style={{ background: "none", border: "none", color: "#5D5FEF", fontSize: "11px", fontWeight: "600", cursor: "pointer" }}
-                      onClick={() => setUnreadNotif(0)}
-                    >
-                      Mark as read
-                    </button>
-                  </div>
-                  <div className="ss-notif-item">
-                    <span style={{ fontSize: "18px" }}>🎯</span>
-                    <div>
-                      <p style={{ fontWeight: "600", margin: "0 0 2px 0", color: "#1C2033" }}>New Daily Challenge is Live!</p>
-                      <span style={{ color: "#8E98B0", fontSize: "11px" }}>Topic: The Future of AI (60s)</span>
-                    </div>
-                  </div>
-                  <div className="ss-notif-item">
-                    <span style={{ fontSize: "18px" }}>🔥</span>
-                    <div>
-                      <p style={{ fontWeight: "600", margin: "0 0 2px 0", color: "#1C2033" }}>7-Day Streak Achieved!</p>
-                      <span style={{ color: "#8E98B0", fontSize: "11px" }}>Keep speaking daily to earn bonuses.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Today's Challenge Header Banner */}
             <div className="ss-today-challenge-card">
               <div className="ss-today-challenge-left">
@@ -490,9 +372,9 @@ const Dashboard = () => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">87.6</div>
+            <div className="ss-stat-value">{dashboardData.averageScore ?? "null"}</div>
             <div className="ss-stat-footer positive">
-              <span>↑ 5.4 this week</span>
+              <span>{dashboardData.averageScore === null ? "null" : "↑ 5.4 this week"}</span>
             </div>
           </div>
 
@@ -506,9 +388,9 @@ const Dashboard = () => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">92</div>
+            <div className="ss-stat-value">{dashboardData.bestScore ?? "null"}</div>
             <div className="ss-stat-footer">
-              <span>Your personal best</span>
+              <span>{dashboardData.bestScore === null ? "null" : "Your personal best"}</span>
             </div>
           </div>
 
@@ -525,9 +407,9 @@ const Dashboard = () => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">28</div>
+            <div className="ss-stat-value">{dashboardData.challengesCompleted ?? "null"}</div>
             <div className="ss-stat-footer">
-              <span>Total completed</span>
+              <span>{dashboardData.challengesCompleted === null ? "null" : "Total completed"}</span>
             </div>
           </div>
 
@@ -542,9 +424,9 @@ const Dashboard = () => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">28h 15m</div>
+            <div className="ss-stat-value">{dashboardData.totalSpeakingTime ?? "null"}</div>
             <div className="ss-stat-footer">
-              <span>Keep practicing!</span>
+              <span>{dashboardData.totalSpeakingTime === null ? "null" : "Keep practicing!"}</span>
             </div>
           </div>
         </section>
@@ -611,6 +493,7 @@ const Dashboard = () => {
 
             {/* Line Chart */}
             <div className="ss-chart-container">
+              {currentWeeklyData.length === 0 && <div style={{ paddingTop: "90px", textAlign: "center" }}>null</div>}
               {hoveredDataPoint && (
                 <div
                   className="ss-chart-tooltip-callout"
@@ -671,6 +554,7 @@ const Dashboard = () => {
             </div>
 
             <div className="ss-radar-container">
+              {radarSkills.length === 0 && <div style={{ padding: "80px 0", textAlign: "center" }}>null</div>}
               <svg viewBox="0 0 240 190" className="ss-radar-svg">
                 {/* Concentric Hexagons */}
                 {hexagonLevels.map((lvl, lvlIdx) => {
@@ -772,7 +656,6 @@ const Dashboard = () => {
                 </div>
                 <div className="ss-legend-item">
                   <span className="ss-legend-line-avg" />
-                  <span>Average</span>
                 </div>
               </div>
             </div>
@@ -792,7 +675,7 @@ const Dashboard = () => {
             </div>
 
             <div className="ss-recent-list">
-              {recentAttempts.map((item) => (
+              {recentAttempts.length === 0 ? <div style={{ padding: "24px", textAlign: "center" }}>null</div> : recentAttempts.map((item) => (
                 <div
                   key={item.id}
                   className="ss-attempt-item"
@@ -875,14 +758,14 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="ss-card-link"
-                onClick={() => setSelectedAchievement(achievements[0])}
+                onClick={() => achievements.length > 0 && setSelectedAchievement(achievements[0])}
               >
                 View All
               </button>
             </div>
 
             <div className="ss-achievements-row">
-              {achievements.map((ach) => (
+              {achievements.length === 0 ? <div style={{ padding: "24px", textAlign: "center", width: "100%" }}>null</div> : achievements.map((ach) => (
                 <div
                   key={ach.id}
                   className="ss-achievement-badge-card"
@@ -1057,11 +940,11 @@ const Dashboard = () => {
                       fontWeight: "800",
                       fontSize: "12px",
                     }}>
-                      Score: 90 / 100
+                      Score: null
                     </span>
                   </div>
                   <p style={{ fontSize: "12px", color: "#15803D", margin: "6px 0 0 0", textAlign: "left" }}>
-                    Great pacing (136 WPM) and clear structure. Minor recommendation: Minimize filler pauses in transition sentences.
+                    null
                   </p>
                 </div>
               )}

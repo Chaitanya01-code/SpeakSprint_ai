@@ -58,6 +58,7 @@ function AchievementBadge({ type }) {
 }
 
 const Achievements = () => {
+  const databaseAchievements = [];
   return (
     <section className="ss-achievements-page" aria-labelledby="achievements-page-title">
       <div className="ss-achievements-page-header">
@@ -65,11 +66,11 @@ const Achievements = () => {
           <p className="ss-achievements-page-eyebrow">Your progress</p>
           <h1 id="achievements-page-title">Achievements</h1>
         </div>
-        <span className="ss-achievements-page-count">4 unlocked</span>
+        <span className="ss-achievements-page-count">{databaseAchievements.length || "null"} unlocked</span>
       </div>
 
       <div className="ss-achievements-page-list">
-        {achievementItems.map((achievement) => (
+        {databaseAchievements.length === 0 ? <p>null</p> : databaseAchievements.map((achievement) => (
           <article className="ss-achievement-page-item" key={achievement.id}>
             <AchievementBadge type={achievement.type} />
             <div className="ss-achievement-page-copy">
