@@ -20,6 +20,7 @@ const SpinWheel = () => {
 	const [isSpinning, setIsSpinning] = useState(false);
 	const [selected, setSelected] = useState(selectedTopic);
 	const [wheelRotation, setWheelRotation] = useState(0);
+	const [sessionDuration, setSessionDuration] = useState(60);
 	const [seconds, setSeconds] = useState(60);
 	const [preparationSeconds, setPreparationSeconds] = useState(5);
 	const [isPreparing, setIsPreparing] = useState(false);
@@ -32,6 +33,23 @@ const SpinWheel = () => {
 	const streamRef = useRef(null);
 	const animationFrameRef = useRef(null);
 	const recordingRef = useRef(false);
+
+	useEffect(() => {
+		const loadSessionDuration = async () => {
+			try {
+				const response = await fetch("http://localhost:8000/api/v1/settings/session-duration");
+				if (!response.ok) return;
+				const data = await response.json();
+				const nextDuration = Number(data.session_duration_seconds || 60);
+				setSessionDuration(nextDuration);
+				setSeconds(nextDuration);
+			} catch (error) {
+				console.warn("Unable to load timer duration", error);
+			}
+		};
+
+		loadSessionDuration();
+	}, []);
 
 	useEffect(() => {
 		if (!isRecording || isPaused || seconds === 0) return undefined;
@@ -100,7 +118,7 @@ const SpinWheel = () => {
 			return;
 		}
 
-		if (seconds === 0) setSeconds(60);
+		if (seconds === 0) setSeconds(sessionDuration || 60);
 		setMicError("");
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -162,7 +180,7 @@ const SpinWheel = () => {
 							<button className={`mic-button ${isRecording ? "recording" : ""}`} onClick={toggleRecording} aria-label={isRecording ? "Stop recording" : "Start recording"}><span>♩</span></button>
 						</div>
 						<div className="recording-info">
-							<div className="recording-status"><strong>{formatTime(60 - seconds)}</strong><small>{isRecording ? "Recording..." : "Ready to record"}</small></div>
+							<div className="recording-status"><strong>{formatTime((sessionDuration || 60) - seconds)}</strong><small>{isRecording ? "Recording..." : "Ready to record"}</small></div>
 							<div className="recording-actions"><button className="secondary-button" onClick={() => setIsPaused((value) => !value)} disabled={!isRecording}>{isPaused ? "▶ Resume" : "Ⅱ Pause"}</button><button className="stop-button" onClick={() => { setIsRecording(false); setIsPaused(false); }}>■ Stop</button></div>
 						</div>
 					</div>

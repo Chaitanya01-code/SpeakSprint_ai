@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./admin.css";
 
 const navigation = [
@@ -55,6 +55,7 @@ function Icon({ name, size = 18 }) {
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     wave: <><path d="M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4M22 12h-1" /></>,
     arrow: <><path d="M5 12h14M13 6l6 6-6 6" /></>,
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -76,6 +77,236 @@ function DashboardHome({ onNavigate }) {
 }
 
 function ManagementPage({ page }) {
+  const [challengeRows, setChallengeRows] = useState([]);
+  const [userRows, setUserRows] = useState([]);
+  const [topicsLoading, setTopicsLoading] = useState(false);
+  const [topicsError, setTopicsError] = useState("");
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [challengeName, setChallengeName] = useState("");
+  const [challengeDescription, setChallengeDescription] = useState("");
+  const [createError, setCreateError] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUserCreateOpen, setIsUserCreateOpen] = useState(false);
+  const [userForm, setUserForm] = useState({ name: "", domain: "", email: "", password: "", confirm_password: "" });
+  const [userCreateError, setUserCreateError] = useState("");
+  const [isUserCreating, setIsUserCreating] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(60);
+  const [timerError, setTimerError] = useState("");
+  const [timerSaving, setTimerSaving] = useState(false);
+  const [timerForm, setTimerForm] = useState("60");
+  const [isTimerOpen, setIsTimerOpen] = useState(false);
+
+  useEffect(() => {
+    if (page !== "users") return;
+
+    const loadTimer = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/v1/settings/session-duration");
+        if (!response.ok) throw new Error("Unable to load timer setting");
+        const data = await response.json();
+        const nextSeconds = Number(data.session_duration_seconds || 60);
+        setTimerSeconds(nextSeconds);
+        setTimerForm(String(nextSeconds));
+      } catch (error) {
+        setTimerError(error.message);
+      }
+    };
+
+    loadTimer();
+  }, [page]);
+
+  useEffect(() => {
+    if (page !== "challenges" && page !== "users") return;
+
+    if (page === "users") {
+      const loadUsers = async () => {
+        setUsersLoading(true);
+        setUsersError("");
+        try {
+          const response = await fetch("http://localhost:8000/api/v1/users");
+          if (!response.ok) throw new Error("Unable to load users");
+          const users = await response.json();
+          setUserRows(users.map((user) => ({
+            id: user.id,
+            isAdmin: user.is_admin,
+            values: [`${user.username || "Unnamed user"} - ${user.email}`, user.domain || "Independent", user.role || "user", "-", user.is_active ? "Active" : "Inactive"],
+          })));
+        } catch (error) {
+          setUsersError(error.message);
+          setUserRows([]);
+        } finally {
+          setUsersLoading(false);
+        }
+      };
+      loadUsers();
+      return;
+    }
+
+    const loadTopics = async () => {
+      setTopicsLoading(true);
+      setTopicsError("");
+
+      try {
+        const response = await fetch("http://localhost:8000/api/v1/topics");
+        if (!response.ok) throw new Error("Unable to load topics");
+
+        const topics = await response.json();
+        setChallengeRows(topics.map((topic) => ({
+          id: topic.id,
+          values: [topic.topic_name, topic.description || "General", "-", "-", "Published"],
+        })));
+      } catch (error) {
+        setTopicsError(error.message);
+        setChallengeRows([]);
+      } finally {
+        setTopicsLoading(false);
+      }
+    };
+
+    loadTopics();
+  }, [page]);
+
+  const closeCreateDialog = () => {
+    setIsCreateOpen(false);
+    setChallengeName("");
+    setChallengeDescription("");
+    setCreateError("");
+  };
+
+  const createChallenge = async (event) => {
+    event.preventDefault();
+    setIsCreating(true);
+    setCreateError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/topics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic_name: challengeName.trim(),
+          description: challengeDescription.trim() || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail || "Unable to create challenge");
+      }
+
+      const topic = await response.json();
+      setChallengeRows((currentRows) => [{
+        id: topic.id,
+        values: [topic.topic_name, topic.description || "General", "-", "-", "Published"],
+      }, ...currentRows]);
+      closeCreateDialog();
+    } catch (error) {
+      setCreateError(error.message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const deleteChallenge = async (topicId, topicName) => {
+    if (!window.confirm(`Delete "${topicName}"?`)) return;
+
+    setTopicsError("");
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/topics/${topicId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail || "Unable to delete challenge");
+      }
+      setChallengeRows((currentRows) => currentRows.filter((row) => row.id !== topicId));
+    } catch (error) {
+      setTopicsError(error.message);
+    }
+  };
+
+  const closeUserDialog = () => {
+    if (isUserCreating) return;
+    setIsUserCreateOpen(false);
+    setUserForm({ name: "", domain: "", email: "", password: "", confirm_password: "" });
+    setUserCreateError("");
+  };
+
+  const createUser = async (event) => {
+    event.preventDefault();
+    setIsUserCreating(true);
+    setUserCreateError("");
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...userForm, name: userForm.name.trim(), domain: userForm.domain.trim() || null, email: userForm.email.trim() }),
+      });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail || "Unable to create user");
+      }
+      const user = await response.json();
+      setUserRows((currentRows) => [{
+        id: user.id,
+        isAdmin: user.is_admin,
+        values: [`${user.username || "Unnamed user"} - ${user.email}`, user.domain || "Independent", user.role || "user", "-", user.is_active ? "Active" : "Inactive"],
+      }, ...currentRows]);
+      closeUserDialog();
+    } catch (error) {
+      setUserCreateError(error.message);
+    } finally {
+      setIsUserCreating(false);
+    }
+  };
+
+  const deleteUser = async (userId, userName) => {
+    if (!window.confirm(`Delete "${userName}"?`)) return;
+    setUsersError("");
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/users/${userId}`, { method: "DELETE" });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail || "Unable to delete user");
+      }
+      setUserRows((currentRows) => currentRows.filter((row) => row.id !== userId));
+    } catch (error) {
+      setUsersError(error.message);
+    }
+  };
+
+  const saveTimer = async (event) => {
+    event.preventDefault();
+    const value = Number(timerForm);
+    if (!Number.isFinite(value) || value <= 0) {
+      setTimerError("Timer must be a positive number of seconds.");
+      return;
+    }
+
+    setTimerSaving(true);
+    setTimerError("");
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/settings/session-duration", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_duration_seconds: value }),
+      });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.detail || "Unable to update timer");
+      }
+      const data = await response.json();
+      const nextSeconds = Number(data.session_duration_seconds || value);
+      setTimerSeconds(nextSeconds);
+      setTimerForm(String(nextSeconds));
+    } catch (error) {
+      setTimerError(error.message);
+    } finally {
+      setTimerSaving(false);
+    }
+  };
+
   const configs = {
     users: { title: "Users", subtitle: "Manage accounts, institutions, and access levels.", action: "Add User", columns: ["User", "Institution", "Role", "Attempts", "Status"], rows: [["Ananya Sharma", "ABC College", "Student", "120", "Active"], ["Rohit Verma", "Tech Institute", "Student", "98", "Active"], ["Priya Singh", "North University", "Student", "110", "Active"], ["Karan Mehta", "ABC College", "Moderator", "105", "Pending"]] },
     challenges: { title: "Challenges", subtitle: "Create and curate speaking challenges for learners.", action: "Create Challenge", columns: ["Challenge", "Category", "Attempts", "Completion", "Status"], rows: [["The Future of AI", "Technology", "4,231", "86%", "Live"], ["Social Media Impact", "Social Issues", "3,982", "79%", "Live"], ["Climate Change", "Environment", "2,987", "71%", "Draft"]] },
@@ -92,14 +323,21 @@ function ManagementPage({ page }) {
     notifications: { title: "Notifications", subtitle: "Review system alerts and administrator announcements.", action: "Create Notice", columns: ["Notification", "Audience", "Sent", "Created By", "Status"], rows: [["New daily challenge is live", "All learners", "12,546", "Admin", "Sent"], ["Scheduled maintenance", "All users", "12,546", "Admin", "Scheduled"], ["Institution onboarding", "Admins", "48", "Admin", "Draft"]] },
   };
   const config = configs[page] || configs.users;
-  return <div className="admin-management-page"><div className="admin-page-heading"><div><h1>{config.title}</h1><p>{config.subtitle}</p></div><button className="admin-export-button">+ {config.action}</button></div><div className="admin-toolbar"><label><Icon name="search" size={16} /><input placeholder={`Search ${config.title.toLowerCase()}...`} /></label><button>All statuses ⌄</button><button>Newest first ⌄</button></div><article className="admin-card admin-management-card"><table><thead><tr>{config.columns.map((column) => <th key={column}>{column}</th>)}<th>Actions</th></tr></thead><tbody>{config.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => <td key={`${cell}-${index}`}><span className={index === row.length - 1 ? "status-pill" : ""}>{cell}</span></td>)}<td><button className="admin-row-action">View</button><button className="admin-row-action">•••</button></td></tr>)}</tbody></table></article></div>;
+  const rows = page === "challenges" ? challengeRows : page === "users" ? userRows : config.rows;
+  const loading = page === "challenges" ? topicsLoading : page === "users" ? usersLoading : false;
+  const loadError = page === "challenges" ? topicsError : page === "users" ? usersError : "";
+  return <div className="admin-management-page"><div className="admin-page-heading"><div><h1>{config.title}</h1><p>{config.subtitle}</p></div><button className="admin-export-button" onClick={() => { if (page === "challenges") setIsCreateOpen(true); if (page === "users") setIsUserCreateOpen(true); }}>+ {config.action}</button></div><div className="admin-toolbar"><label><Icon name="search" size={16} /><input placeholder={`Search ${config.title.toLowerCase()}...`} /></label><button>All statuses ⌄</button><button>Newest first ⌄</button></div><article className="admin-card admin-management-card"><table><thead><tr>{config.columns.map((column) => <th key={column}>{column}</th>)}<th>Actions</th></tr></thead><tbody>{loading && <tr><td colSpan={config.columns.length + 1}>Loading {page}...</td></tr>}{loadError && <tr><td colSpan={config.columns.length + 1}>{loadError}</td></tr>}{!loading && !loadError && rows.map((entry) => { const values = page === "challenges" || page === "users" ? entry.values : entry; return <tr key={page === "challenges" || page === "users" ? entry.id : entry[0]}>{values.map((cell, index) => <td key={`${cell}-${index}`}><span className={index === values.length - 1 ? "status-pill" : ""}>{cell}</span></td>)}<td>{page === "challenges" ? <button className="admin-row-action admin-delete-action" onClick={() => deleteChallenge(entry.id, values[0])}>Delete</button> : page === "users" ? <button className="admin-row-action admin-delete-action" disabled={entry.isAdmin} onClick={() => deleteUser(entry.id, values[0])}>{entry.isAdmin ? "Admin" : "Delete"}</button> : <><button className="admin-row-action">View</button><button className="admin-row-action">•••</button></>}</td></tr>; })}</tbody></table></article>{isCreateOpen && <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && closeCreateDialog()}><section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="create-challenge-title"><div className="admin-modal-header"><div><h2 id="create-challenge-title">Create Challenge</h2><p>Add a speaking challenge to the topic library.</p></div><button type="button" className="admin-modal-close" onClick={closeCreateDialog} aria-label="Close dialog">×</button></div><form onSubmit={createChallenge}><label className="admin-form-field"><span>Challenge name</span><input value={challengeName} onChange={(event) => setChallengeName(event.target.value)} placeholder="Enter challenge name" required autoFocus /></label><label className="admin-form-field"><span>Description <small>(optional)</small></span><textarea value={challengeDescription} onChange={(event) => setChallengeDescription(event.target.value)} placeholder="Add instructions or context" rows="4" /></label>{createError && <p className="admin-form-error" role="alert">{createError}</p>}<div className="admin-modal-actions"><button type="button" className="admin-modal-cancel" onClick={closeCreateDialog}>Cancel</button><button type="submit" className="admin-export-button" disabled={isCreating}>{isCreating ? "Creating..." : "Create Challenge"}</button></div></form></section></div>}{isUserCreateOpen && <div className="admin-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && closeUserDialog()}><section className="admin-modal" role="dialog" aria-modal="true" aria-labelledby="create-user-title"><div className="admin-modal-header"><div><h2 id="create-user-title">Add User</h2><p>Create a learner account using the signup details.</p></div><button type="button" className="admin-modal-close" onClick={closeUserDialog} aria-label="Close dialog">×</button></div><form onSubmit={createUser}><label className="admin-form-field"><span>Name</span><input value={userForm.name} onChange={(event) => setUserForm({ ...userForm, name: event.target.value })} required autoFocus /></label><label className="admin-form-field"><span>Domain <small>(optional)</small></span><input value={userForm.domain} onChange={(event) => setUserForm({ ...userForm, domain: event.target.value })} /></label><label className="admin-form-field"><span>Email</span><input type="email" value={userForm.email} onChange={(event) => setUserForm({ ...userForm, email: event.target.value })} required /></label><label className="admin-form-field"><span>Password</span><input type="password" minLength="8" value={userForm.password} onChange={(event) => setUserForm({ ...userForm, password: event.target.value })} required /></label><label className="admin-form-field"><span>Confirm password</span><input type="password" minLength="8" value={userForm.confirm_password} onChange={(event) => setUserForm({ ...userForm, confirm_password: event.target.value })} required /></label>{userCreateError && <p className="admin-form-error" role="alert">{userCreateError}</p>}<div className="admin-modal-actions"><button type="button" className="admin-modal-cancel" onClick={closeUserDialog}>Cancel</button><button type="submit" className="admin-export-button" disabled={isUserCreating}>{isUserCreating ? "Creating..." : "Add User"}</button></div></form></section></div>}{page === "users" && <div className="admin-card admin-timer-card"><div className="admin-card-heading"><h2>Set Session Timer</h2></div><form onSubmit={saveTimer} className="admin-timer-form"><label className="admin-form-field"><span>Timer length (seconds)</span><input type="number" min="1" step="1" value={timerForm} onChange={(event) => setTimerForm(event.target.value)} /></label><div className="admin-modal-actions"><button type="button" className="admin-modal-cancel" onClick={() => { setTimerForm(String(timerSeconds)); setTimerError(""); }}>Reset</button><button type="submit" className="admin-export-button" disabled={timerSaving}>{timerSaving ? "Saving..." : "Save Timer"}</button></div>{timerError && <p className="admin-form-error">{timerError}</p>}<p className="admin-timer-readout">Current value: {timerSeconds} seconds</p></form></div>}</div>;
 }
 
 const AdminDashboard = () => {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const handleLogout = () => {
+    localStorage.removeItem("authUser");
+    window.location.href = "/login";
+  };
 
-  return <div className="admin-shell"><aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}><div className="admin-brand"><span className="admin-brand-mark"><Icon name="wave" size={22} /></span><span><strong>SpeakSprint <em>AI</em></strong><small>Admin Panel</small></span></div><nav className="admin-nav">{navigation.map((item) => <button type="button" className={activePage === item.id ? "active" : ""} key={item.id} onClick={() => { setActivePage(item.id); setSidebarOpen(false); }}><Icon name={item.icon} size={17} /><span>{item.label}</span>{["users", "challenges", "topics", "speech-analysis", "reports", "logs", "settings"].includes(item.id) && <b>›</b>}</button>)}</nav><div className="admin-server-status"><strong>Server Status</strong><span><i />Operational</span><small>All systems running smoothly.</small><small>Uptime: 99.9%</small></div></aside><main className="admin-main"><header className="admin-topbar"><button className="admin-menu-button" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle navigation">☰</button><label className="admin-global-search"><Icon name="search" size={16} /><input placeholder="Search anything..." /><kbd>⌘K</kbd></label><div className="admin-top-actions"><button aria-label="Notifications"><Icon name="bell" size={18} /><i>12</i></button><button aria-label="Settings"><Icon name="settings" size={18} /></button><span className="admin-admin-profile"><span className="admin-admin-avatar">A</span><strong>Aditya Sharma<small>Super Admin</small></strong><b>⌄</b></span></div></header><div className="admin-content">{activePage === "dashboard" ? <DashboardHome onNavigate={setActivePage} /> : <ManagementPage page={activePage} />}</div></main></div>;
+  return <div className="admin-shell"><aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}><div className="admin-brand"><span className="admin-brand-mark"><Icon name="wave" size={22} /></span><span><strong>SpeakSprint <em>AI</em></strong><small>Admin Panel</small></span></div><nav className="admin-nav">{navigation.map((item) => <button type="button" className={activePage === item.id ? "active" : ""} key={item.id} onClick={() => { setActivePage(item.id); setSidebarOpen(false); }}><Icon name={item.icon} size={17} /><span>{item.label}</span>{["users", "challenges", "topics", "speech-analysis", "reports", "logs", "settings"].includes(item.id) && <b>›</b>}</button>)}</nav><div className="admin-server-status"><strong>Server Status</strong><span><i />Operational</span><small>All systems running smoothly.</small><small>Uptime: 99.9%</small></div></aside><main className="admin-main"><header className="admin-topbar"><button className="admin-menu-button" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle navigation">☰</button><label className="admin-global-search"><Icon name="search" size={16} /><input placeholder="Search anything..." /><kbd>⌘K</kbd></label><div className="admin-top-actions"><button aria-label="Notifications"><Icon name="bell" size={18} /><i>12</i></button><button aria-label="Settings"><Icon name="settings" size={18} /></button><button className="admin-logout-button" type="button" onClick={handleLogout} aria-label="Log out" title="Log out"><Icon name="logout" size={18} /></button><span className="admin-admin-profile"><span className="admin-admin-avatar">A</span><strong>Aditya Sharma<small>Super Admin</small></strong><b>⌄</b></span></div></header><div className="admin-content">{activePage === "dashboard" ? <DashboardHome onNavigate={setActivePage} /> : <ManagementPage page={activePage} />}</div></main></div>;
 };
 
 export default AdminDashboard;

@@ -44,7 +44,7 @@ def initialize_admin_user():
 
     admin_username = os.getenv("ADMIN_USERNAME", "admin123").strip()
     admin_email = os.getenv("ADMIN_EMAIL", "admin@speaksprint.com").strip().lower()
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin 123")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
 
     db = SessionLocal()
     try:

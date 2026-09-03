@@ -310,6 +310,35 @@
   text-overflow: ellipsis;
 }
 
+.ss-logout-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid #223354;
+  border-radius: var(--ss-radius-md);
+  color: #C5CEDF;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--ss-transition);
+}
+
+.ss-logout-button:hover {
+  border-color: #5C6F98;
+  color: #FFFFFF;
+  background: #172650;
+}
+
+.ss-logout-button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    MAIN DASHBOARD CONTENT
    ========================================================================== */
@@ -687,6 +716,28 @@
   height: 220px;
   display: flex;
   flex-direction: column;
+}
+
+.ss-empty-state {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--ss-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.ss-chart-container .ss-empty-state,
+.ss-radar-container .ss-empty-state {
+  position: absolute;
+  inset: 0;
+}
+
+.ss-chart-container.empty .ss-chart-svg {
+  display: none;
 }
 
 .ss-chart-svg {

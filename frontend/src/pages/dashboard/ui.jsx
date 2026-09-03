@@ -9,6 +9,8 @@ import "./design.css";
 const Dashboard = ({ authUser }) => {
   const userName = authUser?.username || null;
   const userEmail = authUser?.email || null;
+  const displayName = userName || "Speaker";
+  const avatarInitial = displayName.slice(0, 1).toUpperCase();
   const dashboardData = {
     averageScore: null,
     bestScore: null,
@@ -27,6 +29,11 @@ const Dashboard = ({ authUser }) => {
   const handleNavChange = (view) => {
     setActiveNav(view);
     setMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authUser");
+    window.location.href = "/login";
   };
 
   // Timeframe filter for weekly progress
@@ -269,13 +276,20 @@ const Dashboard = ({ authUser }) => {
         {/* USER PROFILE CARD */}
         <div className="ss-user-card" onClick={() => handleNavChange("Profile")}>
           <div className="ss-user-avatar">
-            null
+            {avatarInitial}
           </div>
           <div className="ss-user-info">
-            <span className="ss-user-name">{userName === null ? "null" : userName}</span>
-            <span className="ss-user-email">{userEmail === null ? "null" : userEmail}</span>
+            <span className="ss-user-name">{displayName}</span>
+            <span className="ss-user-email">{userEmail || "No email added"}</span>
           </div>
         </div>
+        <button type="button" className="ss-logout-button" onClick={handleLogout}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="m16 17 5-5-5-5M21 12H9" />
+          </svg>
+          <span>Log out</span>
+        </button>
       </aside>
 
       {mobileMenuOpen && (
@@ -322,7 +336,7 @@ const Dashboard = ({ authUser }) => {
             <header className="ss-header-row">
           <div className="ss-greeting-box">
             <h1 className="ss-greeting-title">
-              Good morning, {userName === null ? "null" : userName}! <span role="img" aria-label="wave">👋</span>
+              Good morning, {displayName}! <span role="img" aria-label="wave">👋</span>
             </h1>
             <p className="ss-greeting-sub">Ready to improve your communication skills today?</p>
           </div>
@@ -372,9 +386,9 @@ const Dashboard = ({ authUser }) => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">{dashboardData.averageScore ?? "null"}</div>
+            <div className="ss-stat-value">{dashboardData.averageScore ?? "--"}</div>
             <div className="ss-stat-footer positive">
-              <span>{dashboardData.averageScore === null ? "null" : "↑ 5.4 this week"}</span>
+              <span>{dashboardData.averageScore === null ? "No attempts yet" : "↑ 5.4 this week"}</span>
             </div>
           </div>
 
@@ -388,9 +402,9 @@ const Dashboard = ({ authUser }) => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">{dashboardData.bestScore ?? "null"}</div>
+            <div className="ss-stat-value">{dashboardData.bestScore ?? "--"}</div>
             <div className="ss-stat-footer">
-              <span>{dashboardData.bestScore === null ? "null" : "Your personal best"}</span>
+              <span>{dashboardData.bestScore === null ? "Complete a challenge" : "Your personal best"}</span>
             </div>
           </div>
 
@@ -407,9 +421,9 @@ const Dashboard = ({ authUser }) => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">{dashboardData.challengesCompleted ?? "null"}</div>
+            <div className="ss-stat-value">{dashboardData.challengesCompleted ?? "--"}</div>
             <div className="ss-stat-footer">
-              <span>{dashboardData.challengesCompleted === null ? "null" : "Total completed"}</span>
+              <span>{dashboardData.challengesCompleted === null ? "No challenges yet" : "Total completed"}</span>
             </div>
           </div>
 
@@ -424,9 +438,9 @@ const Dashboard = ({ authUser }) => {
                 </svg>
               </div>
             </div>
-            <div className="ss-stat-value">{dashboardData.totalSpeakingTime ?? "null"}</div>
+            <div className="ss-stat-value">{dashboardData.totalSpeakingTime ?? "--"}</div>
             <div className="ss-stat-footer">
-              <span>{dashboardData.totalSpeakingTime === null ? "null" : "Keep practicing!"}</span>
+              <span>{dashboardData.totalSpeakingTime === null ? "Start your first sprint" : "Keep practicing!"}</span>
             </div>
           </div>
         </section>
@@ -492,8 +506,8 @@ const Dashboard = ({ authUser }) => {
             </div>
 
             {/* Line Chart */}
-            <div className="ss-chart-container">
-              {currentWeeklyData.length === 0 && <div style={{ paddingTop: "90px", textAlign: "center" }}>null</div>}
+            <div className={`ss-chart-container ${currentWeeklyData.length === 0 ? "empty" : ""}`}>
+              {currentWeeklyData.length === 0 && <div className="ss-empty-state">Complete a challenge to see weekly progress</div>}
               {hoveredDataPoint && (
                 <div
                   className="ss-chart-tooltip-callout"
@@ -554,7 +568,7 @@ const Dashboard = ({ authUser }) => {
             </div>
 
             <div className="ss-radar-container">
-              {radarSkills.length === 0 && <div style={{ padding: "80px 0", textAlign: "center" }}>null</div>}
+              {radarSkills.length === 0 && <div className="ss-empty-state">Your skill profile will appear here</div>}
               <svg viewBox="0 0 240 190" className="ss-radar-svg">
                 {/* Concentric Hexagons */}
                 {hexagonLevels.map((lvl, lvlIdx) => {
@@ -675,7 +689,7 @@ const Dashboard = ({ authUser }) => {
             </div>
 
             <div className="ss-recent-list">
-              {recentAttempts.length === 0 ? <div style={{ padding: "24px", textAlign: "center" }}>null</div> : recentAttempts.map((item) => (
+              {recentAttempts.length === 0 ? <div className="ss-empty-state">No recent attempts</div> : recentAttempts.map((item) => (
                 <div
                   key={item.id}
                   className="ss-attempt-item"
@@ -765,7 +779,7 @@ const Dashboard = ({ authUser }) => {
             </div>
 
             <div className="ss-achievements-row">
-              {achievements.length === 0 ? <div style={{ padding: "24px", textAlign: "center", width: "100%" }}>null</div> : achievements.map((ach) => (
+              {achievements.length === 0 ? <div className="ss-empty-state">Complete challenges to earn achievements</div> : achievements.map((ach) => (
                 <div
                   key={ach.id}
                   className="ss-achievement-badge-card"
@@ -940,11 +954,11 @@ const Dashboard = ({ authUser }) => {
                       fontWeight: "800",
                       fontSize: "12px",
                     }}>
-                      Score: null
+                      Score pending
                     </span>
                   </div>
                   <p style={{ fontSize: "12px", color: "#15803D", margin: "6px 0 0 0", textAlign: "left" }}>
-                    null
+                    Your feedback will appear here after analysis.
                   </p>
                 </div>
               )}
