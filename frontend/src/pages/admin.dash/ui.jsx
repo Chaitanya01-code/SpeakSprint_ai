@@ -221,6 +221,23 @@ function Icon({ name, size = 18 }) {
 }
 
 function DashboardHome({ onNavigate }) {
+  const [totalUsers, setTotalUsers] = useState(null);
+
+  useEffect(() => {
+    const loadUserCount = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/v1/users");
+        if (!response.ok) return;
+        const users = await response.json();
+        setTotalUsers(users.length);
+      } catch (error) {
+        console.warn("Unable to load total user count", error);
+      }
+    };
+
+    loadUserCount();
+  }, []);
+
   return (
     <>
       <div className="admin-page-heading">
@@ -249,7 +266,9 @@ function DashboardHome({ onNavigate }) {
             <div>
               <span>{metric.label}</span>
               <strong>
-                {metric.value}
+                {metric.label === "Total Users" && totalUsers !== null
+                  ? totalUsers.toLocaleString()
+                  : metric.value}
                 <small>{metric.suffix}</small>
               </strong>
               <em>
@@ -521,6 +540,9 @@ function ManagementPage({ page }) {
   const [topicsError, setTopicsError] = useState("");
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
+  const [attemptRows, setAttemptRows] = useState([]);
+  const [attemptsLoading, setAttemptsLoading] = useState(false);
+  const [attemptsError, setAttemptsError] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [challengeName, setChallengeName] = useState("");
   const [challengeDescription, setChallengeDescription] = useState("");
@@ -564,7 +586,36 @@ function ManagementPage({ page }) {
   }, [page]);
 
   useEffect(() => {
-    if (page !== "challenges" && page !== "users") return;
+    if (page !== "challenges" && page !== "users" && page !== "attempts") return;
+
+    if (page === "attempts") {
+      const loadAttempts = async () => {
+        setAttemptsLoading(true);
+        setAttemptsError("");
+        try {
+          const response = await fetch("http://localhost:8000/api/v1/attempts");
+          if (!response.ok) throw new Error("Unable to load attempts");
+          const attempts = await response.json();
+          setAttemptRows(attempts.map((attempt) => ({
+            id: attempt.id,
+            values: [
+              attempt.learner,
+              attempt.challenge,
+              attempt.score === null ? "-" : `${attempt.score}/100`,
+              attempt.duration,
+              new Date(attempt.date).toLocaleDateString(),
+            ],
+          })));
+        } catch (error) {
+          setAttemptsError(error.message);
+          setAttemptRows([]);
+        } finally {
+          setAttemptsLoading(false);
+        }
+      };
+      loadAttempts();
+      return;
+    }
 
     if (page === "users") {
       const loadUsers = async () => {
@@ -981,15 +1032,25 @@ function ManagementPage({ page }) {
       ? challengeRows
       : page === "users"
         ? userRows
+        : page === "attempts"
+          ? attemptRows
         : config.rows;
   const loading =
     page === "challenges"
       ? topicsLoading
       : page === "users"
         ? usersLoading
+        : page === "attempts"
+          ? attemptsLoading
         : false;
   const loadError =
-    page === "challenges" ? topicsError : page === "users" ? usersError : "";
+    page === "challenges"
+      ? topicsError
+      : page === "users"
+        ? usersError
+        : page === "attempts"
+          ? attemptsError
+          : "";
   return (
     <div className="admin-management-page">
       <div className="admin-page-heading">

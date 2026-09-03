@@ -12,3 +12,99 @@
 .timer-grid { display: grid; grid-template-columns: 1fr 1.7fr 1fr; gap: 12px; }.countdown-panel, .speak-panel, .tips-panel { border: 1px solid var(--line); border-radius: 8px; padding: 14px; text-align: center; }.countdown-panel h3, .speak-panel h3, .tips-panel h3 { margin: 0 0 12px; font-size: 12px; }.countdown-ring { margin: auto; width: 90px; height: 90px; border: 5px solid #e8e5ff; border-right-color: #5265ee; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; }.countdown-ring strong { font: 700 28px "Space Grotesk"; }.countdown-ring small { font-size: 9px; }.dots { color: #bcc1dc; letter-spacing: 3px; margin-top: 16px; font-size: 10px; }.dots:first-letter { color: var(--purple); }.time-display { display: block; font: 700 44px "Space Grotesk"; margin: 14px 0 4px; }.speak-panel p { color: var(--muted); margin: 0 0 13px; font-size: 11px; }.waveform, .recording-wave { color: var(--purple); font-size: 21px; letter-spacing: 2px; white-space: nowrap; overflow: hidden; }.tips-panel { text-align: left; }.tips-panel p { font-size: 10px; color: #39415e; line-height: 1.4; margin: 9px 0; }.tips-panel b { color: var(--purple); margin-right: 8px; }
 .recording-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, .55fr); align-items: center; gap: 28px; padding: 8px 3% 0; }.recording-visual { display: flex; flex-direction: column; align-items: center; gap: 18px; }.recording-wave { width: 100%; height: 64px; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--purple); }.recording-wave span { width: 5px; min-height: 12px; border-radius: 5px; background: currentColor; transition: height .08s ease; }.mic-button { justify-self: center; flex: 0 0 82px; width: 82px; height: 82px; border: 9px solid #ebe8ff; border-radius: 50%; color: #fff; background: var(--purple); font-size: 34px; cursor: pointer; box-shadow: 0 0 0 8px #f7f5ff; }.mic-button.recording { background: #d43c55; }.recording-info { align-self: center; }.recording-status { min-width: 90px; text-align: left; }.recording-status strong { display: block; font: 700 22px "Space Grotesk"; }.recording-status small { color: var(--muted); }.mic-error { margin: 8px 0 0; color: #d43c55; font-size: 11px; text-align: center; }.recording-actions { display: flex; justify-content: flex-start; gap: 8px; margin-top: 8px; }.secondary-button { border: 1px solid var(--line); background: #fff; color: var(--ink); }.stop-button { background: #f04b5d; color: #fff; }.secondary-button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 720px) { .practice-header nav { display: none; }.practice-content { padding: 0 12px; margin-top: 12px; }.practice-section { padding: 14px; }.topic-grid, .timer-grid { grid-template-columns: 1fr; gap: 16px; }.selected-topic { order: -1; }.step-pill { display: none; }.recording-row { grid-template-columns: 1fr; padding: 8px 0 0; gap: 16px; }.recording-wave { width: 100%; }.recording-info { text-align: center; }.recording-status { text-align: center; }.recording-actions { justify-content: center; }.practice-brand { font-size: 17px; } }
+
+/* Practice surface refinements */
+:root {
+	--practice-coral: #ef6a5b;
+	--practice-teal: #159b9b;
+	--practice-yellow: #f4bd45;
+}
+
+.practice-page {
+	background:
+		radial-gradient(circle at 12% 12%, #e8e5ff 0, transparent 26%),
+		linear-gradient(135deg, #f8f9ff 0%, #ffffff 48%, #f4fbfb 100%);
+}
+
+.practice-header {
+	height: 76px;
+	background: rgba(255, 255, 255, .86);
+	box-shadow: 0 1px 0 rgba(66, 32, 237, .06), 0 8px 24px rgba(28, 35, 80, .04);
+	backdrop-filter: blur(14px);
+}
+
+.practice-brand {
+	display: inline-flex;
+	align-items: center;
+	color: var(--ink);
+	text-decoration: none;
+}
+
+.practice-brand strong { color: var(--purple); }
+.brand-mark { display: inline-grid; place-items: center; width: 30px; height: 30px; margin-right: 8px; border-radius: 9px; color: #fff; background: var(--purple); font-size: 25px; line-height: 1; }
+
+.practice-session-context { display: flex; align-items: flex-end; gap: 8px; padding: 8px 13px; border: 1px solid #e7e8f3; border-radius: 9px; background: #fff; }
+.practice-session-label { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .8px; }
+.practice-session-context strong { color: var(--ink); font-size: 12px; }
+.practice-exit { color: var(--muted); font-size: 11px; font-weight: 700; text-decoration: none; }
+.practice-exit:hover { color: var(--purple); }
+
+.practice-content { margin-top: 34px; }
+.practice-section { padding: 24px; border-color: rgba(207, 210, 232, .75); border-radius: 16px; box-shadow: 0 14px 35px rgba(28, 35, 80, .055); }
+.practice-section:first-child { border-top: 3px solid var(--purple); }
+.practice-section:nth-child(2) { border-top: 3px solid var(--practice-teal); }
+.practice-section:nth-child(3) { border-top: 3px solid var(--practice-coral); }
+.section-heading { margin-bottom: 22px; }
+.section-heading h1 { font-size: 20px; }
+.section-heading p { font-size: 12px; }
+.step-pill { border: 1px solid #dedaff; }
+
+.topic-grid { gap: 54px; }
+.wheel-wrap { min-height: 292px; }
+.wheel { width: 262px; height: 262px; border-width: 8px; box-shadow: 0 0 0 4px #dcd9ff, 0 18px 34px rgba(66, 32, 237, .2); }
+.wheel::before { position: absolute; inset: 10px; border: 1px solid rgba(255, 255, 255, .45); border-radius: 50%; content: ""; pointer-events: none; }
+.spin-button { width: 62px; height: 62px; inset: calc(50% - 31px); border: 5px solid #fff; color: #fff; background: var(--ink); box-shadow: 0 5px 12px rgba(17, 24, 61, .25); letter-spacing: .5px; }
+.spin-button:hover:not(:disabled) { background: var(--purple); transform: scale(1.05); }
+.wheel-pointer { filter: drop-shadow(0 3px 3px rgba(66, 32, 237, .25)); }
+.selected-topic { padding: 24px; border-color: #e1e2ef; background: linear-gradient(145deg, #fff 0%, #fbfaff 100%); box-shadow: 0 10px 24px rgba(47, 35, 130, .05); }
+.selected-topic h2 { font-size: 25px; }
+.primary-button { border-radius: 9px; }
+
+.countdown-panel, .speak-panel, .tips-panel { min-height: 180px; padding: 19px; background: #fcfcff; }
+.countdown-panel { background: linear-gradient(145deg, #fbfaff, #f3f1ff); }
+.speak-panel { background: linear-gradient(145deg, #f5ffff, #effafa); }
+.tips-panel { background: linear-gradient(145deg, #fffdf7, #fff8e8); }
+.countdown-ring { width: 104px; height: 104px; border-width: 6px; border-right-color: var(--practice-teal); }
+.time-display { color: var(--practice-teal); font-size: 50px; }
+.waveform { color: var(--practice-teal); }
+.tips-panel b { color: var(--practice-coral); }
+
+.recording-row { padding-top: 18px; }
+.recording-visual { padding: 20px; border: 1px dashed #d9d5fb; border-radius: 12px; background: #fbfaff; }
+.recording-wave { color: var(--practice-coral); }
+.mic-button { background: var(--practice-coral); box-shadow: 0 0 0 8px #fff1ef, 0 10px 20px rgba(239, 106, 91, .25); }
+.mic-button:hover { transform: translateY(-2px); }
+.mic-button.recording { box-shadow: 0 0 0 8px #ffe5e2, 0 10px 20px rgba(212, 60, 85, .25); }
+.recording-status strong { color: var(--ink); }
+
+@media (max-width: 720px) {
+	.practice-header { height: auto; min-height: 68px; flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+	.practice-session-context { order: 3; width: 100%; justify-content: center; }
+	.practice-exit { margin-left: auto; }
+	.practice-content { margin-top: 18px; }
+	.practice-section { padding: 17px; border-radius: 13px; }
+	.wheel-wrap { min-height: 280px; }
+	.wheel { width: 240px; height: 240px; }
+	.topic-grid { gap: 20px; }
+}
+
+.wheel-label {
+	top: 50%;
+	left: 50%;
+	width: 78px;
+	margin: -7px 0 0 -39px;
+	font-size: 8px;
+	line-height: 1.1;
+	text-shadow: 0 1px 2px rgba(17, 24, 61, .2);
+	transform: rotate(calc(var(--topic-index) * 1turn / var(--topic-count))) translateY(-103px) rotate(calc(var(--topic-index) * -1turn / var(--topic-count)));
+}

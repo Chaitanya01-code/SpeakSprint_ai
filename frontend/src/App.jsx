@@ -5,6 +5,7 @@ import Home from "./pages/homepage/home";
 import AdminDashboard from "./pages/admin.dash/ui";
 import Login from "./pages/loginpage/login";
 import SignUp from "./pages/loginpage/signup";
+import SpinWheel from "./pages/spinwheel/spinwheel";
 
 function App() {
   const path = window.location.pathname;
@@ -12,6 +13,7 @@ function App() {
 
   if (path === "/login") return <Login />;
   if (path === "/signup") return <SignUp />;
+  if (path === "/practice") return <SpinWheel />;
   if (path === "/admin") {
     if (!authUser) {
       window.location.replace("/login");

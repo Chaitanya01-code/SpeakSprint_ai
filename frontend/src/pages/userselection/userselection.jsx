@@ -1,9 +1,28 @@
-import { useState } from "react";
-import { users } from "./users";
+import { useEffect, useState } from "react";
 import "./userselection.css";
 
 const UserSelection = () => {
 	const [selectedName, setSelectedName] = useState("");
+	const [users, setUsers] = useState([]);
+	const [usersLoading, setUsersLoading] = useState(true);
+	const [usersError, setUsersError] = useState("");
+
+	useEffect(() => {
+		const loadUsers = async () => {
+			try {
+				const response = await fetch("http://localhost:8000/api/v1/users");
+				if (!response.ok) throw new Error("Unable to load users");
+				const data = await response.json();
+				setUsers(data.filter((user) => user.is_active && !user.is_admin));
+			} catch (error) {
+				setUsersError(error.message);
+			} finally {
+				setUsersLoading(false);
+			}
+		};
+
+		loadUsers();
+	}, []);
 
 	const handleContinue = (event) => {
 		event.preventDefault();
@@ -33,11 +52,13 @@ const UserSelection = () => {
 							onChange={(event) => setSelectedName(event.target.value)}
 							required
 						>
-							<option value="" disabled>Choose your name</option>
-							{users.map((user) => <option key={user} value={user}>{user}</option>)}
+							<option value="" disabled>{usersLoading ? "Loading users..." : "Choose your name"}</option>
+							{users.map((user) => <option key={user.id} value={user.username || user.email}>{user.username || user.email}</option>)}
 						</select>
 						<span className="select-arrow" aria-hidden="true">⌄</span>
 					</div>
+					{usersError && <p className="user-selection-error" role="alert">{usersError}</p>}
+					{!usersLoading && !usersError && users.length === 0 && <p className="user-selection-error" role="alert">No active users are available.</p>}
 					<button type="submit" className="continue-button">
 						Continue <span aria-hidden="true">→</span>
 					</button>

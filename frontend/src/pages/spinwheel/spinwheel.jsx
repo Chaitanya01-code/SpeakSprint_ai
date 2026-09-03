@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { selectedTopic, topics } from "./topics";
+import { selectedTopic, topics as defaultTopics } from "./topics";
 import "./spinwheel.css";
 
 const formatTime = (seconds) => {
@@ -17,6 +17,8 @@ const createWavePath = (values) => values.map((value, index) => {
 const Icon = ({ children }) => <span className="practice-icon" aria-hidden="true">{children}</span>;
 
 const SpinWheel = () => {
+	const selectedUser = localStorage.getItem("selectedUser") || "Guest Speaker";
+	const [topics, setTopics] = useState(() => defaultTopics.map((title) => ({ title, prompt: selectedTopic.prompt })));
 	const [isSpinning, setIsSpinning] = useState(false);
 	const [selected, setSelected] = useState(selectedTopic);
 	const [wheelRotation, setWheelRotation] = useState(0);
@@ -33,6 +35,27 @@ const SpinWheel = () => {
 	const streamRef = useRef(null);
 	const animationFrameRef = useRef(null);
 	const recordingRef = useRef(false);
+
+	useEffect(() => {
+		const loadTopics = async () => {
+			try {
+				const response = await fetch("http://localhost:8000/api/v1/topics");
+				if (!response.ok) return;
+				const data = await response.json();
+				const adminTopics = data
+					.filter((topic) => topic.topic_name)
+					.map((topic) => ({ title: topic.topic_name, prompt: topic.description || selectedTopic.prompt }));
+				if (adminTopics.length > 0) {
+					setTopics(adminTopics);
+					setSelected(adminTopics[0]);
+				}
+			} catch (error) {
+				console.warn("Unable to load admin topics", error);
+			}
+		};
+
+		loadTopics();
+	}, []);
 
 	useEffect(() => {
 		const loadSessionDuration = async () => {
@@ -86,10 +109,7 @@ const SpinWheel = () => {
 		setIsSpinning(true);
 		setWheelRotation(targetRotation);
 		window.setTimeout(() => {
-			setSelected({
-				title: `The Future of ${topics[topicIndex]}`,
-				prompt: selectedTopic.prompt,
-			});
+			setSelected(topics[topicIndex]);
 			setIsSpinning(false);
 		}, 850);
 	};
@@ -141,13 +161,24 @@ const SpinWheel = () => {
 
 	return (
 		<main className="practice-page">
+			<header className="practice-header">
+				<a className="practice-brand" href="/">
+					<span className="brand-mark" aria-hidden="true">∿</span>
+					SpeakSprint <strong>AI</strong>
+				</a>
+				<div className="practice-session-context">
+					<span className="practice-session-label">CURRENT SPEAKER</span>
+					<strong>{selectedUser}</strong>
+				</div>
+				<a className="practice-exit" href="/">Exit practice <span aria-hidden="true">↗</span></a>
+			</header>
 			<div className="practice-content">
 				<section className="practice-section topic-section">
 					<div className="section-heading"><div><h1>1. Choose a Topic</h1><p>Spin the wheel to get a random topic</p></div><span className="step-pill">STEP 1 OF 3</span></div>
 					<div className="topic-grid">
 						<div className="wheel-wrap">
 							<div className={`wheel ${isSpinning ? "spinning" : ""}`} style={{ transform: `rotate(${wheelRotation}deg)` }}>
-								{topics.map((topic, index) => <span className={`wheel-label label-${index}`} key={topic}>{topic}</span>)}
+								{topics.map((topic, index) => <span className="wheel-label" style={{ "--topic-index": index, "--topic-count": topics.length }} key={topic.title}>{topic.title}</span>)}
 								<button className="spin-button" onClick={spin} disabled={isSpinning}>SPIN</button>
 							</div>
 							<span className="wheel-pointer" aria-hidden="true" />
@@ -181,7 +212,7 @@ const SpinWheel = () => {
 						</div>
 						<div className="recording-info">
 							<div className="recording-status"><strong>{formatTime((sessionDuration || 60) - seconds)}</strong><small>{isRecording ? "Recording..." : "Ready to record"}</small></div>
-							<div className="recording-actions"><button className="secondary-button" onClick={() => setIsPaused((value) => !value)} disabled={!isRecording}>{isPaused ? "▶ Resume" : "Ⅱ Pause"}</button><button className="stop-button" onClick={() => { setIsRecording(false); setIsPaused(false); }}>■ Stop</button></div>
+							<div className="recording-actions"><button className="primary-button start-recording-button" onClick={toggleRecording} disabled={isRecording}>▶ Start</button><button className="secondary-button" onClick={() => setIsPaused((value) => !value)} disabled={!isRecording}>{isPaused ? "▶ Resume" : "Ⅱ Pause"}</button><button className="stop-button" onClick={() => { setIsRecording(false); setIsPaused(false); }}>■ Stop</button></div>
 						</div>
 					</div>
 					{micError && <p className="mic-error">{micError}</p>}

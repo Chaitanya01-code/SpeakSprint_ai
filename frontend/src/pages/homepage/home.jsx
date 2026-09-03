@@ -1,6 +1,34 @@
+import { useEffect, useState } from 'react';
 import './home.css';
 
 export default function Home() {
+  const [isUserSelectionOpen, setIsUserSelectionOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState('');
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState('');
+  const goToLogin = () => { window.location.href = '/login'; };
+  const goToSignup = () => { window.location.href = '/signup'; };
+  const startSpeaking = () => {
+    setIsUserSelectionOpen(true);
+    if (users.length || usersLoading) return;
+    setUsersLoading(true);
+    fetch('http://localhost:8000/api/v1/users')
+      .then((response) => {
+        if (!response.ok) throw new Error('Unable to load users');
+        return response.json();
+      })
+      .then((data) => setUsers(data.filter((user) => user.is_active && !user.is_admin)))
+      .catch((error) => setUsersError(error.message))
+      .finally(() => setUsersLoading(false));
+  };
+  const openSpinWheel = (event) => {
+    event.preventDefault();
+    if (!selectedUser) return;
+    localStorage.setItem('selectedUser', selectedUser);
+    window.location.href = '/practice';
+  };
+
   const stats = [
     { number: '10K+', label: 'Active Speakers', icon: 'users' },
     { number: '250K+', label: 'Challenges Completed', icon: 'check' },
@@ -40,11 +68,32 @@ export default function Home() {
             </div>
           </div>
           <div className="navbar-right">
-            <button className="btn-login">Log in</button>
-            <button className="btn-signup">Sign up</button>
+            <button type="button" className="btn-login" onClick={goToLogin}>Log in</button>
+            <button type="button" className="btn-signup" onClick={goToSignup}>Sign up</button>
           </div>
         </div>
       </nav>
+
+      {isUserSelectionOpen && (
+        <div className="home-user-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setIsUserSelectionOpen(false)}>
+          <section className="home-user-modal" role="dialog" aria-modal="true" aria-labelledby="home-user-selection-title">
+            <button type="button" className="home-user-modal-close" onClick={() => setIsUserSelectionOpen(false)} aria-label="Close user selection">×</button>
+            <div className="home-user-modal-icon" aria-hidden="true">◉</div>
+            <h2 id="home-user-selection-title">Choose a speaker</h2>
+            <p>Select your name to open the speaking spin wheel.</p>
+            <form onSubmit={openSpinWheel}>
+              <label htmlFor="home-user-select">Available users</label>
+              <select id="home-user-select" value={selectedUser} onChange={(event) => setSelectedUser(event.target.value)} required autoFocus>
+                <option value="" disabled>{usersLoading ? 'Loading users...' : 'Choose your name'}</option>
+                {users.map((user) => <option key={user.id} value={user.username || user.email}>{user.username || user.email}</option>)}
+              </select>
+              {usersError && <span className="home-user-modal-error" role="alert">{usersError}</span>}
+              {!usersLoading && !usersError && users.length === 0 && <span className="home-user-modal-error" role="alert">No active users are available.</span>}
+              <button type="submit" className="home-user-modal-submit">Open Spin Wheel <span aria-hidden="true">→</span></button>
+            </form>
+          </section>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="hero">
@@ -61,8 +110,8 @@ export default function Home() {
               communicator.
             </p>
             <div className="hero-buttons">
-              <button className="btn-primary">Start Speaking Now</button>
-              <button className="btn-secondary">
+              <button type="button" className="btn-primary" onClick={startSpeaking}>Start Speaking Now</button>
+              <button type="button" className="btn-secondary" onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>
                 <span className="play-icon-circle">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5v14l11-7z" />
@@ -235,7 +284,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="how-it-works">
+      <section id="how-it-works" className="how-it-works">
         <div className="section-header">
           <h2>How It Works</h2>
           <p>Four simple steps to improve your communication</p>
