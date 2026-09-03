@@ -14,6 +14,7 @@ router = APIRouter()
 
 class AuthRequest(BaseModel):
     username: Optional[str] = None
+    name: Optional[str] = None
     email: Optional[str] = None
     domain: Optional[str] = None
     password: str
@@ -44,7 +45,14 @@ async def register(credentials: AuthRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail="Email is already registered")
 
     password_hash = bcrypt.hashpw(credentials.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    user = User(email=email, password_hash=password_hash, domain=domain, is_admin=False)
+    username = credentials.name.strip() if credentials.name else None
+    user = User(
+        username=username,
+        email=email,
+        password_hash=password_hash,
+        domain=domain,
+        is_admin=False,
+    )
     db.add(user)
     try:
         db.commit()

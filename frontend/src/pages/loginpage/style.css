@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #ffffff;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
@@ -378,75 +378,3 @@
   }
 }
 
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-  .auth-container {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  }
-
-  .auth-card {
-    background: #2d2d2d;
-  }
-
-  .logo-section {
-    border-bottom-color: #444;
-  }
-
-  .logo {
-    color: #e0e0e0;
-  }
-
-  .auth-tabs {
-    background: #1a1a1a;
-    border-bottom-color: #444;
-  }
-
-  .tab-item {
-    color: #777;
-  }
-
-  .tab-item a {
-    color: #777;
-  }
-
-  .tab-item.active {
-    color: #7c3aed;
-    background: #2d2d2d;
-  }
-
-  .tab-item.active a {
-    color: #7c3aed;
-  }
-
-  .auth-title {
-    color: #e0e0e0;
-  }
-
-  .form-group label {
-    color: #c0c0c0;
-  }
-
-  .form-group input[type="text"],
-  .form-group input[type="email"],
-  .form-group input[type="password"] {
-    background-color: #3a3a3a;
-    border-color: #555;
-    color: #e0e0e0;
-  }
-
-  .form-group input[type="text"]:focus,
-  .form-group input[type="email"]:focus,
-  .form-group input[type="password"]:focus {
-    border-color: #7c3aed;
-    background-color: #2d2d2d;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
-  }
-
-  .checkbox-label {
-    color: #a0a0a0;
-  }
-
-  .auth-switch {
-    color: #a0a0a0;
-  }
-}

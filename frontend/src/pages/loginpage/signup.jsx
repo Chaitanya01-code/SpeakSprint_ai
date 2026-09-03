@@ -66,7 +66,7 @@ const SignUp = () => {
 
     try {
       // API call to backend
-      const response = await fetch("http://localhost:8000/api/auth/signup", {
+      const response = await fetch("http://localhost:8000/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ const SignUp = () => {
           window.location.href = "/login";
         }, 2000);
       } else {
-        setError(data.message || "Sign up failed. Please try again.");
+        setError(data.detail || data.message || "Sign up failed. Please try again.");
       }
     } catch (err) {
       setError("An error occurred. Please check your connection and try again.");

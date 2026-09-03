@@ -22,7 +22,7 @@ const Login = () => {
 
     try {
       // API call to backend
-      const response = await fetch("http://localhost:8000/api/auth/login", {
+      const response = await fetch("http://localhost:8000/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,8 +38,7 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store token in localStorage
-        localStorage.setItem("authToken", data.token);
+        localStorage.setItem("authUser", JSON.stringify(data));
         if (rememberMe) {
           localStorage.setItem("rememberedLogin", loginIdentifier);
         } else {
@@ -48,7 +47,7 @@ const Login = () => {
         // Redirect to dashboard
         window.location.href = "/dashboard";
       } else {
-        setError(data.message || "Login failed. Please try again.");
+        setError(data.detail || data.message || "Login failed. Please try again.");
       }
     } catch (err) {
       setError("An error occurred. Please check your connection and try again.");

@@ -1,6 +1,6 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from .database import Base, SessionLocal, create_all_tables
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, inspect, text
+from .database import Base, SessionLocal, create_all_tables, engine
 
 
 class User(Base):
@@ -23,6 +23,17 @@ from .speechdb import TextModel
 
 # Create all tables in the database
 create_all_tables()
+
+
+def ensure_domain_column():
+    """Add the domain column for databases created before domain was introduced."""
+    columns = {column["name"] for column in inspect(engine).get_columns("users")}
+    if "domain" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE users ADD COLUMN domain VARCHAR(255)"))
+
+
+ensure_domain_column()
 
 
 def initialize_admin_user():
