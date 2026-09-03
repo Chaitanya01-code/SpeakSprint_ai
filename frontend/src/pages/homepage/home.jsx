@@ -1,684 +1,331 @@
-import React from "react";
+import './home.css';
 
-const Home = () => {
+export default function Home() {
+  const stats = [
+    { number: '10K+', label: 'Active Speakers', icon: 'users' },
+    { number: '250K+', label: 'Challenges Completed', icon: 'check' },
+    { number: '95%', label: 'Users Improve', icon: 'success' },
+    { number: '4.8/5', label: 'User Rating', icon: 'star' }
+  ];
+
+  const steps = [
+    { step: '1', title: 'Get a Topic', desc: 'We give you a random topic to speak about.' },
+    { step: '2', title: 'Speak for 60 Sec', desc: 'Talk for 60 seconds to improve your confidence.' },
+    { step: '3', title: 'AI Analyses', desc: 'Our AI analyses your speech and gives helpful feedback.' },
+    { step: '4', title: 'Get Feedback', desc: 'Receive a detailed score and personalized feedback.' }
+  ];
+
+  const features = [
+    { title: 'AI Powered', desc: 'Advanced AI analyzes your speech with helpful insights.' },
+    { title: 'Comprehensive', desc: 'We check grammar, fluency, pace, pronunciation and more.' },
+    { title: 'Track Progress', desc: 'See your progress over time with useful insights.' },
+    { title: 'Build Confidence', desc: 'Practice daily and become a more confident speaker.' }
+  ];
+
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-
-      {/* =====================================================
-          NAVBAR
-      ====================================================== */}
-      <header className="border-b border-slate-100 bg-white">
-        <nav className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-6 sm:px-10 lg:px-14">
-
-          {/* LOGO */}
-          <a href="#home" className="flex items-center gap-2.5">
-            <div className="flex items-center gap-[3px]">
-
-              <span className="h-5 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-8 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-4 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-7 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-3 w-[3px] rounded-full bg-indigo-600" />
-
+    <div className="home">
+      {/* Navbar */}
+      <nav className="navbar">
+        <div className="navbar-content">
+          <div className="navbar-left">
+            <div className="logo">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-wave-icon">
+                <rect x="2" y="8.5" width="2.4" height="7" rx="1.2" fill="#4F46E5" />
+                <rect x="6.5" y="4.5" width="2.4" height="15" rx="1.2" fill="#4F46E5" />
+                <rect x="11" y="2" width="2.4" height="20" rx="1.2" fill="#4F46E5" />
+                <rect x="15.5" y="6" width="2.4" height="12" rx="1.2" fill="#4F46E5" />
+                <rect x="20" y="7.5" width="2.4" height="9" rx="1.2" fill="#4F46E5" />
+              </svg>
+              <span className="logo-text">SpeakSprint <span className="logo-ai">AI</span></span>
             </div>
-
-            <span className="text-[22px] font-extrabold tracking-tight text-slate-900">
-              SpeakSprint
-              <span className="text-indigo-600"> AI</span>
-            </span>
-          </a>
-
-
-          {/* NAVIGATION */}
-          <div className="hidden items-center gap-8 lg:flex">
-
-            <a
-              href="#home"
-              className="text-[14px] font-medium text-slate-900 transition hover:text-indigo-600"
-            >
-              Home
-            </a>
-
-            <a
-              href="#features"
-              className="text-[14px] font-medium text-slate-600 transition hover:text-indigo-600"
-            >
-              Features
-            </a>
-
-            <a
-              href="#how-it-works"
-              className="text-[14px] font-medium text-slate-600 transition hover:text-indigo-600"
-            >
-              How It Works
-            </a>
-
-            <a
-              href="#pricing"
-              className="text-[14px] font-medium text-slate-600 transition hover:text-indigo-600"
-            >
-              Pricing
-            </a>
-
-            <a
-              href="#faq"
-              className="text-[14px] font-medium text-slate-600 transition hover:text-indigo-600"
-            >
-              FAQ
-            </a>
-
           </div>
-
-
-          {/* AUTH BUTTONS */}
-          <div className="hidden items-center gap-3 sm:flex">
-
-            <button className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-              Log in
-            </button>
-
-            <button className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700">
-              Sign up
-            </button>
-
+          <div className="navbar-right">
+            <button className="btn-login">Log in</button>
+            <button className="btn-signup">Sign up</button>
           </div>
+        </div>
+      </nav>
 
-
-          {/* MOBILE MENU */}
-          <button className="rounded-lg border border-slate-200 p-2.5 lg:hidden">
-
-            <svg
-              className="h-5 w-5 text-slate-700"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M4 6h16" />
-              <path d="M4 12h16" />
-              <path d="M4 18h16" />
-            </svg>
-
-          </button>
-
-        </nav>
-      </header>
-
-
-      {/* =====================================================
-          HERO SECTION
-      ====================================================== */}
-      <section id="home" className="overflow-hidden bg-white">
-
-        <div className="mx-auto grid min-h-[500px] max-w-[1440px] items-center px-6 py-16 sm:px-10 lg:grid-cols-2 lg:px-14 lg:py-20">
-
-          {/* LEFT HERO */}
-          <div className="max-w-[590px]">
-
-            <h1 className="text-[42px] font-extrabold leading-[1.12] tracking-[-1.5px] text-slate-950 sm:text-[52px] lg:text-[58px]">
-
-              Speak for
-              <br />
-
-              60 Seconds.
-              <br />
-
-              <span className="text-indigo-600">
-                Improve
-              </span>{" "}
-              for a Lifetime.
-
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="hero-content">
+          <div className="hero-text">
+            <h1 className="hero-heading">
+              Speak for<br />
+              60 Seconds.<br />
+              <span className="hero-purple">Improve</span> for a Lifetime.
             </h1>
-
-
-            <p className="mt-6 max-w-[510px] text-[16px] leading-7 text-slate-600 sm:text-[17px]">
-
-              AI-powered speaking practice that analyzes your speech
-              and helps you become a confident communicator.
-
+            <p className="hero-paragraph">
+              AI-powered speaking practice that analyzes your<br />
+              speech and helps you become a confident<br />
+              communicator.
             </p>
-
-
-            {/* HERO BUTTONS */}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-
-              <button className="rounded-xl bg-indigo-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
-
-                Start Speaking Now
-
-              </button>
-
-
-              <button className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
-
-                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400">
-
-                  <svg
-                    className="ml-[1px] h-2.5 w-2.5 fill-slate-700"
-                    viewBox="0 0 10 10"
-                  >
-                    <path d="M2 1l7 4-7 4V1z" />
+            <div className="hero-buttons">
+              <button className="btn-primary">Start Speaking Now</button>
+              <button className="btn-secondary">
+                <span className="play-icon-circle">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
                   </svg>
-
                 </span>
-
                 Watch Demo
-
               </button>
-
             </div>
-
           </div>
+          <div className="hero-visual">
+            <svg className="microphone" viewBox="0 0 460 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                {/* 3D Capsule Gradient */}
+                <linearGradient id="capsuleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#6366F1" />
+                  <stop offset="25%" stopColor="#5B58EE" />
+                  <stop offset="60%" stopColor="#4338CA" />
+                  <stop offset="90%" stopColor="#3730A3" />
+                  <stop offset="100%" stopColor="#312E81" />
+                </linearGradient>
 
+                {/* Cradle U-Arm Gradient */}
+                <linearGradient id="cradleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#554DE8" />
+                  <stop offset="50%" stopColor="#4338CA" />
+                  <stop offset="100%" stopColor="#3730A3" />
+                </linearGradient>
 
-          {/* RIGHT MICROPHONE ILLUSTRATION */}
-          <div className="relative mt-12 flex min-h-[360px] items-center justify-center lg:mt-0">
+                {/* Cradle 3D Highlight */}
+                <linearGradient id="cradleHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#818CF8" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#6366F1" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#4338CA" stopOpacity="0" />
+                </linearGradient>
 
-            {/* SOFT CIRCLE */}
-            <div className="absolute h-[320px] w-[320px] rounded-full bg-indigo-50 sm:h-[370px] sm:w-[370px]" />
+                {/* Stand Stem Gradient */}
+                <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#6366F1" />
+                  <stop offset="40%" stopColor="#4F46E5" />
+                  <stop offset="100%" stopColor="#312E81" />
+                </linearGradient>
 
-            <div className="absolute h-[270px] w-[270px] rounded-full border-[18px] border-indigo-50 sm:h-[310px] sm:w-[310px]" />
+                {/* Base Top Gradient */}
+                <linearGradient id="baseTop" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#6366F1" />
+                  <stop offset="100%" stopColor="#4338CA" />
+                </linearGradient>
 
+                {/* Base Rim Gradient */}
+                <linearGradient id="baseRim" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4F46E5" />
+                  <stop offset="50%" stopColor="#3730A3" />
+                  <stop offset="100%" stopColor="#312E81" />
+                </linearGradient>
 
-            {/* SOUND WAVE LEFT */}
-            <div className="absolute left-[5%] flex items-center gap-1 sm:left-[3%]">
+                {/* Wave Bar Gradient */}
+                <linearGradient id="waveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#9B9DF8" />
+                  <stop offset="100%" stopColor="#8184F5" />
+                </linearGradient>
 
-              <span className="h-8 w-[4px] rounded-full bg-indigo-400" />
-              <span className="h-16 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-11 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-24 w-[4px] rounded-full bg-indigo-600" />
-              <span className="h-14 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-32 w-[4px] rounded-full bg-indigo-600" />
+                {/* Outer Glow Radial */}
+                <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#EEF0FF" stopOpacity="0.8" />
+                  <stop offset="70%" stopColor="#F5F6FF" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+                </radialGradient>
 
-            </div>
+                {/* Drop shadow filter */}
+                <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#4338CA" floodOpacity="0.18" />
+                </filter>
+              </defs>
 
+              {/* Background Circular Glow Rings */}
+              <circle cx="230" cy="200" r="165" fill="url(#outerGlow)" />
+              <circle cx="230" cy="200" r="135" fill="#F8F9FF" stroke="#E9ECFD" strokeWidth="1.5" />
+              <circle cx="230" cy="200" r="102" fill="#ECEFFE" opacity="0.65" />
 
-            {/* SOUND WAVE RIGHT */}
-            <div className="absolute right-[5%] flex items-center gap-1 sm:right-[3%]">
+              {/* Sound Wave Bars Left */}
+              <g className="sound-waves-left">
+                <rect x="42" y="185" width="5" height="30" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+                <rect x="57" y="174" width="5" height="52" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-2" />
+                <rect x="72" y="162" width="5" height="76" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="87" y="180" width="5" height="40" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+                <rect x="102" y="152" width="5" height="96" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="117" y="138" width="5.5" height="124" rx="2.75" fill="url(#waveGrad)" className="wave-bar wave-2" />
+                <rect x="133" y="148" width="5.5" height="104" rx="2.75" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="149" y="168" width="5" height="64" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+              </g>
 
-              <span className="h-32 w-[4px] rounded-full bg-indigo-600" />
-              <span className="h-14 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-24 w-[4px] rounded-full bg-indigo-600" />
-              <span className="h-11 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-16 w-[4px] rounded-full bg-indigo-500" />
-              <span className="h-8 w-[4px] rounded-full bg-indigo-400" />
+              {/* Sound Wave Bars Right */}
+              <g className="sound-waves-right">
+                <rect x="306" y="168" width="5" height="64" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+                <rect x="321" y="148" width="5.5" height="104" rx="2.75" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="337" y="138" width="5.5" height="124" rx="2.75" fill="url(#waveGrad)" className="wave-bar wave-2" />
+                <rect x="353" y="152" width="5" height="96" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="368" y="180" width="5" height="40" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+                <rect x="383" y="162" width="5" height="76" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-3" />
+                <rect x="398" y="174" width="5" height="52" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-2" />
+                <rect x="413" y="185" width="5" height="30" rx="2.5" fill="url(#waveGrad)" className="wave-bar wave-1" />
+              </g>
 
-            </div>
+              {/* Drop Shadow Underneath Stand Base */}
+              <ellipse cx="230" cy="336" rx="38" ry="7" fill="#CCD1F5" opacity="0.55" />
 
+              {/* Pedestal Base (Disc) */}
+              <ellipse cx="230" cy="326" rx="34" ry="9" fill="url(#baseRim)" />
+              <ellipse cx="230" cy="323" rx="32" ry="7" fill="url(#baseTop)" />
 
-            {/* MICROPHONE */}
-            <div className="relative z-10 flex flex-col items-center">
+              {/* Vertical Stand Shaft */}
+              <rect x="224" y="240" width="12" height="85" rx="6" fill="url(#stemGrad)" />
 
-              <div className="relative flex h-[180px] w-[105px] items-center justify-center rounded-[55px] bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-800 shadow-xl shadow-indigo-500/30">
+              {/* Cradle Base Joint */}
+              <rect x="218" y="231" width="24" height="14" rx="7" fill="url(#cradleGrad)" />
 
-                {/* MIC LINES */}
-                <div className="absolute left-7 top-[52px] space-y-3">
+              {/* Shockmount Cradle U-Arm */}
+              <path
+                d="M 178 184 C 178 244, 282 244, 282 184"
+                fill="none"
+                stroke="url(#cradleGrad)"
+                strokeWidth="11"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 178 184 C 178 244, 282 244, 282 184"
+                fill="none"
+                stroke="url(#cradleHighlight)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
 
-                  <div className="h-[4px] w-12 rounded-full bg-white/90" />
-                  <div className="h-[4px] w-12 rounded-full bg-white/90" />
-                  <div className="h-[4px] w-12 rounded-full bg-white/90" />
+              {/* Cradle Pivot Knobs */}
+              <circle cx="178" cy="184" r="6.5" fill="url(#cradleGrad)" />
+              <circle cx="178" cy="184" r="3" fill="#818CF8" />
+              <circle cx="282" cy="184" r="6.5" fill="url(#cradleGrad)" />
+              <circle cx="282" cy="184" r="3" fill="#818CF8" />
 
-                </div>
+              {/* 3D Microphone Capsule */}
+              <g filter="url(#shadowFilter)">
+                <rect x="198" y="112" width="64" height="118" rx="32" fill="url(#capsuleGrad)" />
 
-              </div>
+                {/* Capsule Top Specular Light */}
+                <ellipse cx="221" cy="132" rx="14" ry="9" fill="#FFFFFF" opacity="0.32" transform="rotate(-20 221 132)" />
 
-
-              {/* MIC HOLDER */}
-              <div className="relative h-[90px] w-[150px]">
-
-                <div className="absolute left-1/2 top-[-20px] h-[100px] w-[115px] -translate-x-1/2 rounded-b-[65px] border-b-[12px] border-l-[12px] border-r-[12px] border-indigo-700" />
-
-                <div className="absolute left-1/2 top-[62px] h-[38px] w-[10px] -translate-x-1/2 bg-indigo-700" />
-
-                <div className="absolute bottom-0 left-1/2 h-[10px] w-[80px] -translate-x-1/2 rounded-full bg-indigo-700" />
-
-              </div>
-
-            </div>
-
+                {/* Grille Horizontal Lines */}
+                <rect x="208" y="142" width="44" height="3.5" rx="1.75" fill="#FFFFFF" opacity="0.5" />
+                <rect x="206" y="154" width="48" height="3.5" rx="1.75" fill="#FFFFFF" opacity="0.5" />
+                <rect x="206" y="166" width="48" height="3.5" rx="1.75" fill="#FFFFFF" opacity="0.5" />
+                <rect x="208" y="178" width="44" height="3.5" rx="1.75" fill="#FFFFFF" opacity="0.5" />
+              </g>
+            </svg>
           </div>
-
         </div>
       </section>
 
-
-      {/* =====================================================
-          STATISTICS
-      ====================================================== */}
-      <section className="px-6 pb-12 sm:px-10 lg:px-14">
-
-        <div className="mx-auto grid max-w-[1370px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-
-          {/* STAT 1 */}
-          <div className="flex items-center gap-4 border-b border-slate-200 p-6 lg:border-b-0 lg:border-r">
-
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-
+      {/* Statistics Section */}
+      <section className="statistics">
+        <div className="stats-container">
+          {stats.map((stat, idx) => (
+            <div key={idx} className="stat-card">
+              <div className={`stat-icon icon-${stat.icon}`}></div>
+              <div className="stat-info">
+                <div className="stat-number">{stat.number}</div>
+                <div className="stat-label">{stat.label}</div>
+              </div>
             </div>
-
-            <div>
-              <p className="text-xl font-extrabold text-slate-900">
-                10K+
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Active Speakers
-              </p>
-            </div>
-
-          </div>
-
-
-          {/* STAT 2 */}
-          <div className="flex items-center gap-4 border-b border-slate-200 p-6 lg:border-b-0 lg:border-r">
-
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
-                <rect x="4" y="4" width="16" height="16" rx="3" />
-                <path d="M8 8h8v8H8z" />
-              </svg>
-
-            </div>
-
-            <div>
-              <p className="text-xl font-extrabold text-slate-900">
-                250K+
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Challenges Completed
-              </p>
-            </div>
-
-          </div>
-
-
-          {/* STAT 3 */}
-          <div className="flex items-center gap-4 border-b border-slate-200 p-6 lg:border-b-0 lg:border-r">
-
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
-                <path d="M4 19V5" />
-                <path d="M4 19h17" />
-                <path d="m7 15 4-4 3 2 5-7" />
-              </svg>
-
-            </div>
-
-            <div>
-              <p className="text-xl font-extrabold text-slate-900">
-                95%
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                Users Improve
-              </p>
-            </div>
-
-          </div>
-
-
-          {/* STAT 4 */}
-          <div className="flex items-center gap-4 p-6">
-
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
-                <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
-              </svg>
-
-            </div>
-
-            <div>
-              <p className="text-xl font-extrabold text-slate-900">
-                4.8 ★
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                User Rating
-              </p>
-            </div>
-
-          </div>
-
+          ))}
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="how-it-works">
+        <div className="section-header">
+          <h2>How It Works</h2>
+          <p>Four simple steps to improve your communication</p>
+        </div>
+        <div className="steps-container">
+          {steps.map((step, idx) => (
+            <div key={idx} className="step-card">
+              <div className="step-number">{step.step}</div>
+              <h3>{step.title}</h3>
+              <p>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* =====================================================
-          HOW IT WORKS
-      ====================================================== */}
-      <section id="how-it-works" className="px-6 py-14 sm:px-10 lg:px-14">
+      {/* Why Choose Section */}
+      <section className="why-choose">
+        <div className="why-choose-content">
+          <h2>Why Choose SpeakSprint AI?</h2>
+          <p>Everything you need to become a better speaker</p>
+          <div className="features-grid">
+            {features.map((feature, idx) => (
+              <div key={idx} className="feature-box">
+                <div className="feature-icon"></div>
+                <h3>{feature.title}</h3>
+                <p>{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <div className="mx-auto max-w-[1370px]">
-
-          <div className="text-center">
-
-            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-              How It Works
-            </h2>
-
-            <p className="mt-3 text-sm text-slate-500">
-              Four simple steps to improve your communication
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="logo-wave-icon">
+                <rect x="2" y="8.5" width="2.4" height="7" rx="1.2" fill="#4F46E5" />
+                <rect x="6.5" y="4.5" width="2.4" height="15" rx="1.2" fill="#4F46E5" />
+                <rect x="11" y="2" width="2.4" height="20" rx="1.2" fill="#4F46E5" />
+                <rect x="15.5" y="6" width="2.4" height="12" rx="1.2" fill="#4F46E5" />
+                <rect x="20" y="7.5" width="2.4" height="9" rx="1.2" fill="#4F46E5" />
+              </svg>
+              <span className="logo-text">SpeakSprint <span className="logo-ai">AI</span></span>
+            </div>
+            <p className="footer-tagline">
+              AI-powered speaking practice that analyzes your speech and helps you become a confident communicator. Practice for 60 seconds and improve for a lifetime.
             </p>
-
           </div>
-
-
-          <div className="mt-9 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-
-            {/* STEP 1 */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-lg font-bold text-indigo-600">
-                1
+          <div className="footer-right">
+            <div className="footer-connect">
+              <span className="footer-connect-title">Connect with us</span>
+              <div className="footer-socials">
+                <a href="#twitter" aria-label="Twitter" className="social-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+                <a href="#linkedin" aria-label="LinkedIn" className="social-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76a1.62 1.62 0 1 0 0-3.24 1.62 1.62 0 0 0 0 3.24m1.4 9.74v-8.37H5.06v8.37z"/>
+                  </svg>
+                </a>
+                <a href="#github" aria-label="GitHub" className="social-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+                  </svg>
+                </a>
+                <a href="#discord" aria-label="Discord" className="social-btn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                  </svg>
+                </a>
               </div>
-
-              <h3 className="mt-5 text-lg font-bold text-slate-900">
-                Get a Topic
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                We give you a random topic to speak about.
-              </p>
-
             </div>
-
-
-            {/* STEP 2 */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-lg font-bold text-indigo-600">
-                2
-              </div>
-
-              <h3 className="mt-5 text-lg font-bold text-slate-900">
-                Speak for 60 Sec
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                You get 5 seconds to prepare and then speak for 60 seconds.
-              </p>
-
+            <div className="footer-meta-links">
+              <a href="#privacy">Privacy Policy</a>
+              <span className="dot">•</span>
+              <a href="#terms">Terms of Service</a>
+              <span className="dot">•</span>
+              <a href="#cookies">Cookie Preferences</a>
             </div>
-
-
-            {/* STEP 3 */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-lg font-bold text-indigo-600">
-                3
-              </div>
-
-              <h3 className="mt-5 text-lg font-bold text-slate-900">
-                AI Analyzes
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                Our AI analyzes your speech across multiple parameters.
-              </p>
-
-            </div>
-
-
-            {/* STEP 4 */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50 text-lg font-bold text-indigo-600">
-                4
-              </div>
-
-              <h3 className="mt-5 text-lg font-bold text-slate-900">
-                Get Feedback
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                You receive detailed feedback and a score to improve.
-              </p>
-
-            </div>
-
           </div>
-
         </div>
-      </section>
-
-
-      {/* =====================================================
-          WHY CHOOSE SPEAKSPRINT
-      ====================================================== */}
-      <section id="features" className="px-6 pb-14 sm:px-10 lg:px-14">
-
-        <div className="mx-auto max-w-[1370px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#17175c] via-[#202080] to-[#3020a5] px-6 py-10 text-white sm:px-10">
-
-          <h2 className="text-center text-2xl font-extrabold sm:text-3xl">
-            Why Choose SpeakSprint AI?
-          </h2>
-
-
-          <div className="mt-9 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-
-            {/* FEATURE 1 */}
-            <div>
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="12" r="8" />
-                  <path d="M9 12h6" />
-                  <path d="M12 9v6" />
-                </svg>
-
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                AI Powered
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-indigo-100">
-                Advanced AI analyzes your speech like a personal coach.
-              </p>
-
-            </div>
-
-
-            {/* FEATURE 2 */}
-            <div>
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M5 5h14v14H5z" />
-                  <path d="M8 15c2-4 6-4 8 0" />
-                  <path d="M9 9h.01" />
-                  <path d="M15 9h.01" />
-                </svg>
-
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                Comprehensive
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-indigo-100">
-                We check grammar, fluency, pace, vocabulary and more.
-              </p>
-
-            </div>
-
-
-            {/* FEATURE 3 */}
-            <div>
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M4 19V5" />
-                  <path d="M4 19h17" />
-                  <path d="m7 15 4-4 3 2 5-7" />
-                </svg>
-
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                Track Progress
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-indigo-100">
-                See your progress over time with beautiful analytics.
-              </p>
-
-            </div>
-
-
-            {/* FEATURE 4 */}
-            <div>
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="12" r="8" />
-                  <path d="M12 8v4l3 2" />
-                  <path d="M8 4 6 2" />
-                  <path d="M16 4l2-2" />
-                </svg>
-
-              </div>
-
-              <h3 className="mt-4 font-bold">
-                Build Confidence
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-indigo-100">
-                Practice daily and become a confident speaker.
-              </p>
-
-            </div>
-
-          </div>
-
+        <div className="footer-bottom">
+          <p>© 2026 SpeakSprint AI. All rights reserved.</p>
+          <p className="footer-note">Speak for 60 seconds. Improve for a lifetime.</p>
         </div>
-
-      </section>
-
-
-      {/* =====================================================
-          BOTTOM CTA
-      ====================================================== */}
-      <section id="pricing" className="px-6 py-14 sm:px-10 lg:px-14">
-
-        <div className="mx-auto max-w-[900px] text-center">
-
-          <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-            Start improving your speaking today.
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-xl text-slate-500">
-            Just 60 seconds a day can help you become a more confident
-            communicator.
-          </p>
-
-          <button className="mt-7 rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
-            Start Speaking Now
-          </button>
-
-        </div>
-
-      </section>
-
-
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
-      <footer id="faq" className="border-t border-slate-200 bg-white">
-
-        <div className="mx-auto flex max-w-[1370px] flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:px-10 md:flex-row md:text-left lg:px-14">
-
-          <div className="flex items-center gap-2">
-
-            <div className="flex items-center gap-[2px]">
-
-              <span className="h-4 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-6 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-3 w-[3px] rounded-full bg-indigo-600" />
-              <span className="h-5 w-[3px] rounded-full bg-indigo-600" />
-
-            </div>
-
-            <span className="font-bold text-slate-900">
-              SpeakSprint
-              <span className="text-indigo-600"> AI</span>
-            </span>
-
-          </div>
-
-          <p className="text-xs text-slate-500">
-            © 2026 SpeakSprint AI. All rights reserved.
-          </p>
-
-        </div>
-
       </footer>
-
     </div>
   );
-};
-
-export default Home;
+}
