@@ -10,6 +10,7 @@ class User(Base):
     username = Column(String(255), unique=True, nullable=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
+    domain = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -18,7 +19,7 @@ class User(Base):
 
 # Import all models to ensure they are registered with Base before creating tables
 from .topicdb import Topic
-from .textdb import TextModel
+from .speechdb import TextModel
 
 # Create all tables in the database
 create_all_tables()

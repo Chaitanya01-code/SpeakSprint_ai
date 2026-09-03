@@ -15,6 +15,7 @@ router = APIRouter()
 class AuthRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
+    domain: Optional[str] = None
     password: str
     confirm_password: Optional[str] = None
 
@@ -29,6 +30,9 @@ async def register(credentials: AuthRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email is required")
 
     email = credentials.email.strip().lower()
+    domain = credentials.domain.strip() if credentials.domain else None
+    if credentials.domain is not None and not domain:
+        raise HTTPException(status_code=400, detail="Domain cannot be empty")
 
     if credentials.confirm_password is not None and credentials.confirm_password != credentials.password:
         raise HTTPException(status_code=400, detail="Passwords do not match")
@@ -40,14 +44,14 @@ async def register(credentials: AuthRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail="Email is already registered")
 
     password_hash = bcrypt.hashpw(credentials.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    user = User(email=email, password_hash=password_hash, is_admin=False)
+    user = User(email=email, password_hash=password_hash, domain=domain, is_admin=False)
     db.add(user)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Email is already registered")
-    return {"message": "Registration successful", "user_id": user.id}
+    return {"message": "Registration successful", "user_id": user.id, "domain": user.domain}
 
 
 @router.post("/login")
@@ -73,7 +77,8 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
             "message": "Admin signed in successfully",
             "user_id": user.id,
             "is_admin": True,
-            "username": user.username
+            "username": user.username,
+            "domain": user.domain,
         }
 
     # Regular user login using email
@@ -98,6 +103,7 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
         "message": "Signed in successfully",
         "user_id": user.id,
         "is_admin": False,
-        "email": user.email
+        "email": user.email,
+        "domain": user.domain,
     }
 
