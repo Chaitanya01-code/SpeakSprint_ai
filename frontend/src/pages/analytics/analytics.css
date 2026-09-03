@@ -226,34 +226,26 @@
   overflow: visible;
 }
 
-.ss-trend-curve-line {
-  fill: none;
-  stroke: #4E50E6;
-  stroke-width: 2.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.ss-trend-axis-line {
+  stroke: #E8EAF3;
+  stroke-width: 1;
 }
 
-.ss-trend-point-dot {
-  fill: #FFFFFF;
-  stroke: #4E50E6;
-  stroke-width: 2.6;
-  r: 5;
+.ss-trend-bar {
+  fill: #A9A9F4;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  transition: fill 0.2s ease, transform 0.2s ease;
 }
 
-.ss-trend-point-dot.peak {
+.ss-trend-bar.peak {
   fill: #4E50E6;
-  stroke: #4E50E6;
-  r: 5.5;
 }
 
-.ss-trend-point-dot:hover {
-  r: 7;
-  fill: #4E50E6;
-  stroke: #FFFFFF;
-  stroke-width: 2;
+.ss-trend-bar:hover {
+  fill: #5D5FEF;
+  transform: scaleY(1.03);
 }
 
 .ss-trend-point-text {

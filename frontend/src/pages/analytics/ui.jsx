@@ -87,29 +87,6 @@ const Analytics = () => {
 
   const currentData = analyticsDataSets[timeframe] || analyticsDataSets["This Month"];
 
-  // Generate smooth cubic bezier SVG path for line chart
-  const generateSmoothPath = (points) => {
-    if (!points || points.length === 0) return "";
-    let path = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      const mx = (p0.x + p1.x) / 2;
-      path += ` C ${mx} ${p0.y}, ${mx} ${p1.y}, ${p1.x} ${p1.y}`;
-    }
-    return path;
-  };
-
-  // Generate closed area path for gradient fill
-  const generateAreaPath = (points) => {
-    if (!points || points.length === 0) return "";
-    const linePath = generateSmoothPath(points);
-    const lastX = points[points.length - 1].x;
-    const firstX = points[0].x;
-    const bottomY = 220;
-    return `${linePath} L ${lastX} ${bottomY} L ${firstX} ${bottomY} Z`;
-  };
-
   // Radar chart geometry calculations
   const radarCenter = { x: 135, y: 110 };
   const radarRadius = 72;
@@ -211,56 +188,33 @@ const Analytics = () => {
 
         <div className="ss-trend-chart-container">
           <svg viewBox="0 0 660 250" className="ss-trend-svg" preserveAspectRatio="none">
-            <defs>
-              {/* Gradient fill under the trend curve */}
-              <linearGradient id="ssTrendGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#5D5FEF" stopOpacity="0.22" />
-                <stop offset="60%" stopColor="#5D5FEF" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#5D5FEF" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
+            <line x1="25" y1="220" x2="635" y2="220" className="ss-trend-axis-line" />
 
-            {/* Shaded Area Under Curve */}
-            <path d={generateAreaPath(currentData.trendPoints)} fill="url(#ssTrendGrad)" />
-
-            {/* Smooth Curve Stroke */}
-            <path d={generateSmoothPath(currentData.trendPoints)} className="ss-trend-curve-line" />
-
-            {/* Data Point Circles and Score Labels */}
+            {/* Score bars and labels */}
             {currentData.trendPoints.map((pt, idx) => (
-              <g key={idx}>
-                {/* Score Number above dot */}
+              <g key={idx} className="ss-trend-bar-group">
+                <rect
+                  x={pt.x - 25}
+                  y={220 - Math.max(12, ((pt.score - 50) / 50) * 145)}
+                  width="50"
+                  height={Math.max(12, ((pt.score - 50) / 50) * 145)}
+                  rx="6"
+                  className={`ss-trend-bar ${pt.isPeak ? "peak" : ""}`}
+                />
                 <text
                   x={pt.x}
-                  y={pt.y - 12}
+                  y={220 - Math.max(12, ((pt.score - 50) / 50) * 145) - 10}
                   className="ss-trend-point-text"
                 >
                   {pt.score}
                 </text>
-
-                {/* Point Dot */}
-                <circle
-                  cx={pt.x}
-                  cy={pt.y}
-                  className={`ss-trend-point-dot ${pt.isPeak ? "peak" : ""}`}
-                />
+                {pt.date && (
+                  <text x={pt.x} y="240" className="ss-trend-axis-date">
+                    {pt.date}
+                  </text>
+                )}
               </g>
             ))}
-
-            {/* X-Axis Date Labels along the bottom */}
-            {currentData.trendPoints.map((pt, idx) => {
-              if (!pt.date) return null;
-              return (
-                <text
-                  key={`date-${idx}`}
-                  x={pt.x}
-                  y="238"
-                  className="ss-trend-axis-date"
-                >
-                  {pt.date}
-                </text>
-              );
-            })}
           </svg>
         </div>
       </section>
