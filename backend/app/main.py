@@ -6,7 +6,6 @@ from app.models import topic
 from app.models import user
 from app.models import attempt
 from app.core.userdb import initialize_admin_user
-from app.core.settingsdb import initialize_default_settings
 
 app = FastAPI()
 
@@ -19,11 +18,6 @@ async def startup_event():
 # Include routers
 app.include_router(auth.router)
 app.include_router(topic.router)
-app.include_router(user.router)
-app.include_router(attempt.router)
-
-from app.api import settings as settings_api
-app.include_router(settings_api.router)
 
 app.add_middleware(
     CORSMiddleware,
