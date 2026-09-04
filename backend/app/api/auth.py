@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.database import User, get_db
+from app.core import User, get_db
 
 router = APIRouter()
 
