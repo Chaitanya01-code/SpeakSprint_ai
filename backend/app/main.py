@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth
+from app.api import speech
 from app.models import topic
 from app.models import user
 from app.models import attempt
@@ -18,6 +19,7 @@ async def startup_event():
 # Include routers
 app.include_router(auth.router)
 app.include_router(topic.router)
+app.include_router(speech.router)
 
 app.add_middleware(
     CORSMiddleware,
