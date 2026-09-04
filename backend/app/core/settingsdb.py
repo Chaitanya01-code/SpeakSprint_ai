@@ -10,14 +10,14 @@ class AppSetting(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     key = Column(String(100), unique=True, nullable=False, index=True)
-    value = Column(Integer, nullable=False, default=60)
+    value = Column(Integer, nullable=False, default=120)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         return f"<AppSetting(key={self.key}, value={self.value})>"
 
 
-DEFAULT_SESSION_DURATION_SECONDS = 60
+DEFAULT_SESSION_DURATION_SECONDS = 120
 SESSION_DURATION_KEY = "session_duration_seconds"
 
 
@@ -33,6 +33,10 @@ def initialize_default_settings():
                     value=DEFAULT_SESSION_DURATION_SECONDS,
                 )
             )
+            db.commit()
+        elif existing.value == 60:
+            existing.value = DEFAULT_SESSION_DURATION_SECONDS
+            existing.updated_at = datetime.utcnow()
             db.commit()
     finally:
         db.close()

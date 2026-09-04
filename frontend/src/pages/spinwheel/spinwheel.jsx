@@ -25,8 +25,8 @@ const SpinWheel = () => {
 	const [isSpinning, setIsSpinning] = useState(false);
 	const [selected, setSelected] = useState(selectedTopic);
 	const [wheelRotation, setWheelRotation] = useState(0);
-	const [sessionDuration, setSessionDuration] = useState(60);
-	const [seconds, setSeconds] = useState(60);
+	const [sessionDuration, setSessionDuration] = useState(120);
+	const [seconds, setSeconds] = useState(120);
 	const [preparationSeconds, setPreparationSeconds] = useState(5);
 	const [isPreparing, setIsPreparing] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
@@ -78,7 +78,7 @@ const SpinWheel = () => {
 				const response = await fetch("http://localhost:8000/api/v1/settings/session-duration");
 				if (!response.ok) return;
 				const data = await response.json();
-				const nextDuration = Number(data.session_duration_seconds || 60);
+				const nextDuration = Number(data.session_duration_seconds || 120);
 				setSessionDuration(nextDuration);
 				setSeconds(nextDuration);
 			} catch (error) {
@@ -107,7 +107,6 @@ const SpinWheel = () => {
 		const timer = window.setInterval(() => {
 			setPreparationSeconds((value) => {
 				if (value <= 1) {
-					setIsPreparing(false);
 					return 0;
 				}
 				return value - 1;
@@ -115,6 +114,14 @@ const SpinWheel = () => {
 		}, 1000);
 		return () => window.clearInterval(timer);
 	}, [isPreparing]);
+
+	useEffect(() => {
+		if (!isPreparing || preparationSeconds !== 0) return;
+		setIsPreparing(false);
+		setIsPaused(false);
+		if (seconds === 0) setSeconds(sessionDuration || 120);
+		start();
+	}, [isPreparing, preparationSeconds, seconds, sessionDuration, start]);
 
 	useEffect(() => {
 		if (!isRecording) return;
@@ -137,6 +144,8 @@ const SpinWheel = () => {
 
 	const startChallenge = () => {
 		setPreparationSeconds(5);
+		setSeconds(sessionDuration || 120);
+		setSaveNotice(null);
 		setIsPreparing(true);
 		document.getElementById("timer")?.scrollIntoView({ behavior: "smooth" });
 	};
@@ -186,11 +195,11 @@ const SpinWheel = () => {
 				</section>
 
 				<section className="practice-section timer-section" id="timer">
-					<div className="section-heading"><div><h1>2. Speak for 60 Seconds</h1><p>You have 5 seconds to prepare, then speak for 60 seconds.</p></div><span className="step-pill">STEP 2 OF 3</span></div>
+					<div className="section-heading"><div><h1>2. Speak for 120 Seconds</h1><p>You have 5 seconds to prepare, then speak for 120 seconds.</p></div><span className="step-pill">STEP 2 OF 3</span></div>
 					<div className="timer-grid">
-						<article className="countdown-panel"><h3>{isPreparing ? "Get Ready!" : "Ready!"}</h3><div className="countdown-ring"><strong>{preparationSeconds.toString().padStart(2, "0")}</strong><small>seconds</small></div><div className="dots">{Array.from({ length: 6 }, (_, index) => index < 5 - preparationSeconds ? "●" : "○").join(" ")}</div></article>
-						<article className="speak-panel"><h3>Speak Now!</h3><strong className="time-display">{formatTime(seconds)}</strong><p>Tap the mic to start speaking</p><div className="waveform">▁▃▁▅▂▇▃▁▅▂▁▆▃▁▅▂▇▃▁▅▂▁▃</div></article>
-						<aside className="tips-panel"><h3>Tips</h3><p><b>◉</b> Speak clearly and confidently</p><p><b>◌</b> Stay on topic</p><p><b>◈</b> Manage your time well</p><p><b>✓</b> Practice makes perfect</p></aside>
+						<article className="countdown-panel"><h3>{isPreparing ? "Get Ready!" : "Ready!"}</h3><div className="countdown-ring"><strong>{preparationSeconds.toString().padStart(2, "0")}</strong><small>seconds</small></div><div className="dots">{Array.from({ length: 6 }, (_, index) => index < 5 - preparationSeconds ? "●" : "○").join(" ")}</div><span className="panel-state"><span>♩</span> Microphone ready <b>✓</b></span></article>
+						<article className="speak-panel"><div className="speak-panel-title"><h3>Speak Now!</h3><span>{sessionDuration}s</span></div><div className="speak-mic-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8" /></svg></div><strong className="time-display">{formatTime(seconds)}</strong><p>Tap the mic to start speaking</p><div className="timeline"><span>0s</span><i><b /></i><span>{Math.round(sessionDuration / 2)}s</span><i><b /></i><span>{sessionDuration}s</span></div></article>
+						<aside className="tips-panel"><h3>Tips</h3><p><b>◉</b> Speak clearly and confidently</p><p><b>◌</b> Stay on topic</p><p><b>◈</b> Manage your time well</p><p><b>★</b> Practice makes perfect</p></aside>
 					</div>
 				</section>
 
@@ -201,7 +210,10 @@ const SpinWheel = () => {
 							<div className="recording-wave" aria-label="Live voice waveform">
 								{waveform.map((height, index) => <span key={index} style={{ height: `${12 + height * 42}px` }} />)}
 							</div>
-							<button className={`mic-button ${isRecording ? "recording" : ""}`} onClick={toggleRecording} aria-label={isRecording ? "Stop recording" : "Start recording"}><span>♩</span></button>
+							<button className={`mic-button ${isRecording ? "recording" : ""}`} onClick={toggleRecording} aria-label={isRecording ? "Stop recording" : "Start recording"}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8" /></svg></button>
+							<div className="recording-wave recording-wave-right" aria-hidden="true">
+								{waveform.slice().reverse().map((height, index) => <span key={index} style={{ height: `${12 + height * 42}px` }} />)}
+							</div>
 						</div>
 							<div className="recording-info">
 								{transcript && <p className="speech-transcript" aria-live="polite">{transcript}</p>}

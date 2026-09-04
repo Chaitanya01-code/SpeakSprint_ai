@@ -147,3 +147,430 @@
 	text-shadow: 0 1px 2px rgba(17, 24, 61, .2);
 	transform: rotate(calc(var(--topic-index) * 1turn / var(--topic-count))) translateY(-103px) rotate(calc(var(--topic-index) * -1turn / var(--topic-count)));
 }
+
+/* Reference practice layout */
+.practice-page {
+	background: #fbfbfd;
+	color: #151a35;
+	font-family: "DM Sans", sans-serif;
+}
+
+.practice-header {
+	height: 62px;
+	padding-inline: max(22px, calc((100vw - 1150px) / 2));
+	background: #fff;
+	border-bottom: 1px solid #ececf3;
+}
+
+.practice-content {
+	max-width: 1160px;
+	margin: 18px auto 54px;
+	padding: 0 12px;
+}
+
+.practice-section {
+	margin-bottom: 10px;
+	padding: 14px 18px 16px;
+	border: 1px solid #e7e8ef;
+	border-radius: 9px;
+	box-shadow: 0 1px 5px rgba(30, 33, 80, .04);
+}
+
+.practice-section:first-child,
+.practice-section:nth-child(2),
+.practice-section:nth-child(3) {
+	border-top: 1px solid #e7e8ef;
+}
+
+.section-heading {
+	margin-bottom: 10px;
+}
+
+.section-heading h1 {
+	margin-bottom: 2px;
+	font-size: 17px;
+	letter-spacing: 0;
+}
+
+.section-heading p {
+	font-size: 11px;
+}
+
+.step-pill {
+	display: none;
+}
+
+.topic-grid {
+	grid-template-columns: minmax(390px, .9fr) minmax(0, 1.1fr);
+	gap: 46px;
+}
+
+.wheel-wrap {
+	min-height: 266px;
+	align-items: center;
+}
+
+.wheel {
+	width: 264px;
+	height: 264px;
+	border: 7px solid #fff;
+	box-shadow: 0 0 0 2px #e3e5ef, 0 8px 18px rgba(59, 64, 110, .12);
+}
+
+.wheel::after {
+	inset: 43%;
+	background: #fff;
+	box-shadow: 0 0 0 1px #e5e6ee;
+}
+
+.wheel-label {
+	font-size: 9px;
+	font-weight: 700;
+	text-shadow: 0 1px 2px rgba(22, 27, 59, .25);
+}
+
+.wheel-pointer {
+	top: -7px;
+	border-top-color: #6541e8;
+}
+
+.spin-button {
+	width: 62px;
+	height: 62px;
+	inset: calc(50% - 31px);
+	border: 0;
+	background: #fff;
+	color: #18203b;
+	font-size: 17px;
+	box-shadow: 0 2px 5px rgba(19, 26, 63, .1);
+}
+
+.selected-topic {
+	min-height: 250px;
+	padding: 22px 24px;
+	border-color: #e6e7ef;
+	border-radius: 9px;
+	background: #fff;
+	box-shadow: none;
+}
+
+.topic-kicker {
+	color: #5d35d9;
+	font-size: 12px;
+}
+
+.selected-topic h2 {
+	max-width: 450px;
+	margin: 15px 0 10px;
+	font-size: 27px;
+	line-height: 1.08;
+}
+
+.selected-topic p {
+	max-width: 390px;
+	margin-bottom: 17px;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.primary-button {
+	min-height: 42px;
+	border-radius: 8px;
+	background: linear-gradient(100deg, #5931df, #6929e8);
+	box-shadow: 0 5px 12px rgba(88, 44, 221, .2);
+}
+
+.timer-grid {
+	grid-template-columns: minmax(180px, .9fr) minmax(260px, 1.15fr) minmax(180px, .9fr);
+	gap: 18px;
+}
+
+.countdown-panel,
+.speak-panel,
+.tips-panel {
+	min-height: 176px;
+	padding: 13px 16px;
+	border-color: #e4e5ed;
+	border-radius: 8px;
+}
+
+.countdown-panel {
+	background: #fff;
+}
+
+.countdown-panel h3,
+.speak-panel h3,
+.tips-panel h3 {
+	margin-bottom: 8px;
+	font-size: 12px;
+}
+
+.countdown-ring {
+	width: 105px;
+	height: 78px;
+	border: 0;
+	border-radius: 8px;
+	background: #fff;
+	box-shadow: inset 0 0 0 1px #e8e9f1, 0 2px 4px rgba(32, 37, 75, .04);
+	flex-direction: row;
+	align-items: center;
+	gap: 3px;
+}
+
+.countdown-ring strong {
+	font-size: 38px;
+	letter-spacing: 2px;
+	color: #5b32df;
+}
+
+.countdown-ring small {
+	display: none;
+}
+
+.dots {
+	margin-top: 8px;
+	font-size: 9px;
+}
+
+.panel-state {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 8px;
+	padding: 5px 10px;
+	border-radius: 6px;
+	background: #effbf4;
+	color: #20a767;
+	font-size: 10px;
+	font-weight: 700;
+}
+
+.panel-state span {
+	color: #5c3be2;
+}
+
+.speak-panel {
+	background: #fff;
+}
+
+.speak-panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.speak-panel-title span {
+	padding: 3px 7px;
+	border-radius: 5px;
+	background: #f0edff;
+	color: #5b32df;
+	font-size: 10px;
+	font-weight: 800;
+}
+
+.speak-mic-icon {
+	height: 20px;
+	color: #6440df;
+	line-height: 1;
+}
+
+.speak-mic-icon svg {
+	width: 21px;
+	height: 21px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.time-display {
+	margin: 3px 0 0;
+	color: #101733;
+	font-size: 43px;
+	line-height: 1;
+}
+
+.speak-panel p {
+	margin: 5px 0 7px;
+	font-size: 10px;
+}
+
+.timeline {
+	display: grid;
+	grid-template-columns: auto 1fr auto 1fr auto;
+	align-items: center;
+	gap: 6px;
+	color: #7b819a;
+	font-size: 9px;
+}
+
+.timeline i {
+	position: relative;
+	height: 1px;
+	background: #c8c4ef;
+}
+
+.timeline i b {
+	position: absolute;
+	left: 0;
+	top: -3px;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #5b32df;
+}
+
+.tips-panel {
+	background: #fff;
+	text-align: left;
+}
+
+.tips-panel p {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 10px 0;
+	font-size: 10px;
+}
+
+.tips-panel b {
+	display: inline-grid;
+	width: 19px;
+	height: 19px;
+	place-items: center;
+	margin: 0;
+	border-radius: 50%;
+	background: #f0edff;
+	color: #6541df;
+}
+
+.recording-section {
+	padding-bottom: 13px;
+}
+
+.recording-row {
+	display: grid;
+	grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr) minmax(210px, .8fr);
+	align-items: center;
+	gap: 26px;
+	padding: 3px 5px 0;
+}
+
+.recording-visual {
+	display: contents;
+}
+
+.recording-wave {
+	grid-column: 1;
+	width: 100%;
+	height: 58px;
+	color: #6440df;
+}
+
+.recording-wave-right {
+	grid-column: 3;
+}
+
+.recording-wave span {
+	width: 3px;
+	min-height: 8px;
+	border-radius: 3px;
+	background: currentColor;
+}
+
+.mic-button {
+	grid-column: 2;
+	width: 92px;
+	height: 92px;
+	border: 9px solid #f0edff;
+	background: #6035e2;
+	box-shadow: 0 0 0 7px #f8f6ff, 0 7px 18px rgba(82, 48, 208, .25);
+}
+
+.mic-button svg {
+	width: 34px;
+	height: 34px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.8;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.recording-info {
+	grid-column: 4;
+	min-width: 0;
+}
+
+.recording-status {
+	text-align: left;
+}
+
+.recording-status strong {
+	font-size: 20px;
+}
+
+.recording-status small {
+	display: block;
+	margin-top: 2px;
+	color: #e8344c;
+	font-size: 10px;
+}
+
+.recording-actions {
+	justify-content: flex-start;
+	margin-top: 13px;
+}
+
+.recording-actions .primary-button {
+	display: none;
+}
+
+.secondary-button,
+.stop-button {
+	min-height: 35px;
+	padding: 8px 17px;
+	font-size: 11px;
+}
+
+.stop-button {
+	background: #ec123b;
+}
+
+@media (max-width: 720px) {
+	.topic-grid,
+	.timer-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.recording-row {
+		grid-template-columns: 1fr;
+		gap: 14px;
+	}
+
+	.recording-wave,
+	.mic-button,
+	.recording-info {
+		grid-column: 1;
+	}
+
+	.recording-wave-right {
+		grid-column: 1;
+	}
+
+	.recording-info,
+	.recording-status {
+		text-align: center;
+	}
+
+	.recording-actions {
+		justify-content: center;
+	}
+
+	.recording-actions .primary-button {
+		display: inline-block;
+		width: auto;
+	}
+}
