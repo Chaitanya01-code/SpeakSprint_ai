@@ -18,7 +18,7 @@ class User(Base):
 
 # Import all models to ensure they are registered with Base before creating tables
 from .topicdb import Topic
-from .textdb import TextModel
+from .speechdb import TextModel
 
 # Create all tables in the database
 create_all_tables()

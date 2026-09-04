@@ -81,6 +81,13 @@ The API will be available at `http://localhost:8000`
 - `PUT /api/v1/topics/{topic_id}` - Update topic
 - `DELETE /api/v1/topics/{topic_id}` - Delete topic
 
+#### Speech-to-text
+- `WebSocket /ws/speech-to-text` - Stream binary audio chunks to Deepgram
+
+Send audio chunks as binary WebSocket messages. The server returns JSON messages
+with `type`, `transcript`, and `is_final`. Send `stop` or `{"type":"stop"}`
+as a text message to finish the stream.
+
 ## 📁 Project Structure
 
 ```
