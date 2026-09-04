@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import "./history.css";
 
 const initialAttemptsData = [
@@ -346,6 +346,41 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
 
   // Selected attempt for full analysis modal
   const [selectedAttempt, setSelectedAttempt] = useState(null);
+
+  useEffect(() => {
+    const userId = authUser?.user_id;
+    if (!userId) return;
+
+    fetch(`http://localhost:8000/api/v1/transcripts?user_id=${userId}`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load speaking history");
+        return response.json();
+      })
+      .then((transcripts) => setAttempts(transcripts.map((item) => ({
+        id: item.id,
+        title: item.topic || "Untitled speaking session",
+        category: "Speaking practice",
+        date: new Date(item.created_at).toLocaleDateString(),
+        time: new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        duration: `${item.duration_seconds}s`,
+        score: item.score ?? 0,
+        status: "green",
+        wpm: 0,
+        clarity: "-",
+        grammar: "-",
+        pronunciation: "-",
+        confidence: "-",
+        topicRelevance: "-",
+        isBookmarked: false,
+        audioLength: `${item.duration_seconds}s`,
+        feedback: "Transcript saved. Speech analysis is not available yet.",
+        strengths: [],
+        improvements: [],
+        transcript: [{ text: item.transcript, isFiller: false }],
+        radarSkills: [],
+      }))))
+      .catch((error) => console.warn(error));
+  }, [authUser?.user_id]);
 
   // Toggle Bookmark
   const toggleBookmark = (id, e) => {

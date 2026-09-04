@@ -4,6 +4,7 @@ import Analytics from "../analytics";
 import Leaderboard from "../leaderboard/ui";
 import Achievements from "../achievements/ui";
 import Profile from "../profile/ui";
+import useSpeechToText from "../../hooks/useSpeechToText";
 import "./design.css";
 
 const Dashboard = ({ authUser }) => {
@@ -31,7 +32,10 @@ const Dashboard = ({ authUser }) => {
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (authUser?.user_id) {
+      await fetch(`http://localhost:8000/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
+    }
     localStorage.removeItem("authUser");
     window.location.href = "/login";
   };
@@ -44,6 +48,7 @@ const Dashboard = ({ authUser }) => {
   const [isChallengeModalOpen, setIsChallengeModalOpen] = useState(false);
   const [recordingState, setRecordingState] = useState("idle"); // idle, recording, analyzing, completed
   const [countdown, setCountdown] = useState(60);
+  const { error: speechError, saveTranscript, start: startSpeech, stop: stopSpeech, transcript } = useSpeechToText();
   const [selectedTopic, setSelectedTopic] = useState(
     "How Artificial Intelligence is Shaping the Future of Creative Work"
   );
@@ -127,13 +132,15 @@ const Dashboard = ({ authUser }) => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (recordingState === "recording" && countdown === 0) {
+      stopSpeech();
+      saveTranscript({ userId: authUser?.user_id, durationSeconds: 60, topic: selectedTopic }).catch((error) => console.error("Transcript save error:", error));
       setRecordingState("analyzing");
       setTimeout(() => {
         setRecordingState("completed");
       }, 2000);
     }
     return () => clearInterval(timer);
-  }, [recordingState, countdown]);
+  }, [authUser?.user_id, countdown, recordingState, saveTranscript, selectedTopic, stopSpeech]);
 
   const startChallengeSession = () => {
     const randomTopics = [
@@ -149,12 +156,16 @@ const Dashboard = ({ authUser }) => {
     setIsChallengeModalOpen(true);
   };
 
-  const handleStartRecording = () => {
+  const handleStartRecording = async () => {
+    const started = await startSpeech();
+    if (!started) return;
     setRecordingState("recording");
     setCountdown(60);
   };
 
   const handleStopRecording = () => {
+    stopSpeech();
+    saveTranscript({ userId: authUser?.user_id, durationSeconds: 60 - countdown, topic: selectedTopic }).catch((error) => console.error("Transcript save error:", error));
     setRecordingState("analyzing");
     setTimeout(() => {
       setRecordingState("completed");
@@ -885,7 +896,11 @@ const Dashboard = ({ authUser }) => {
               <button
                 type="button"
                 className="ss-modal-close-btn"
-                onClick={() => setIsChallengeModalOpen(false)}
+                onClick={() => {
+                  stopSpeech();
+                  setRecordingState("idle");
+                  setIsChallengeModalOpen(false);
+                }}
               >
                 ✕
               </button>
@@ -926,6 +941,14 @@ const Dashboard = ({ authUser }) => {
                 <p style={{ fontSize: "12.5px", color: "#EF4444", fontWeight: "600" }}>
                   🔴 Live Recording in progress... Keep speaking!
                 </p>
+              )}
+
+              {transcript && (
+                <p className="ss-live-transcript" aria-live="polite">{transcript}</p>
+              )}
+
+              {speechError && (
+                <p className="ss-live-transcript ss-live-transcript-error" role="alert">{speechError}</p>
               )}
 
               {recordingState === "analyzing" && (
@@ -993,7 +1016,11 @@ const Dashboard = ({ authUser }) => {
                   type="button"
                   className="ss-btn-primary"
                   style={{ width: "100%", justifyContent: "center" }}
-                  onClick={() => setIsChallengeModalOpen(false)}
+                  onClick={() => {
+                    stopSpeech();
+                    setRecordingState("idle");
+                    setIsChallengeModalOpen(false);
+                  }}
                 >
                   Done & Save Attempt
                 </button>

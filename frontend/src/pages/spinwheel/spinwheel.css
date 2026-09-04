@@ -87,6 +87,45 @@
 .mic-button.recording { box-shadow: 0 0 0 8px #ffe5e2, 0 10px 20px rgba(212, 60, 85, .25); }
 .recording-status strong { color: var(--ink); }
 
+.speech-transcript {
+	max-width: 460px;
+	margin: 0 auto 12px;
+	padding: 10px 12px;
+	border-left: 3px solid var(--practice-teal);
+	background: #f0fbfb;
+	color: #39415e;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.save-notice {
+	position: fixed;
+	left: 50%;
+	bottom: 24px;
+	z-index: 20;
+	margin: 0;
+	padding: 12px 18px;
+	border: 1px solid #b7e4d2;
+	border-radius: 8px;
+	background: #effcf5;
+	box-shadow: 0 8px 24px rgba(20, 80, 55, .14);
+	color: #176b49;
+	font-weight: 700;
+	transform: translateX(-50%);
+}
+
+.save-notice.saving {
+	border-color: #cfd5f5;
+	background: #f5f6ff;
+	color: #4d55a6;
+}
+
+.save-notice.error {
+	border-color: #f2b8bf;
+	background: #fff5f6;
+	color: #b42335;
+}
+
 @media (max-width: 720px) {
 	.practice-header { height: auto; min-height: 68px; flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
 	.practice-session-context { order: 3; width: 100%; justify-content: center; }

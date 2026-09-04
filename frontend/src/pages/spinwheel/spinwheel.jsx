@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { selectedTopic, topics as defaultTopics } from "./topics";
+import useSpeechToText from "../../hooks/useSpeechToText";
 import "./spinwheel.css";
 
 const formatTime = (seconds) => {
@@ -17,7 +18,9 @@ const createWavePath = (values) => values.map((value, index) => {
 const Icon = ({ children }) => <span className="practice-icon" aria-hidden="true">{children}</span>;
 
 const SpinWheel = () => {
-	const selectedUser = localStorage.getItem("selectedUser") || "Guest Speaker";
+	const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
+	const selectedUser = localStorage.getItem("selectedUser") || authUser?.username || "Guest Speaker";
+	const selectedUserId = localStorage.getItem("selectedUserId") || authUser?.user_id;
 	const [topics, setTopics] = useState(() => defaultTopics.map((title) => ({ title, prompt: selectedTopic.prompt })));
 	const [isSpinning, setIsSpinning] = useState(false);
 	const [selected, setSelected] = useState(selectedTopic);
@@ -26,15 +29,27 @@ const SpinWheel = () => {
 	const [seconds, setSeconds] = useState(60);
 	const [preparationSeconds, setPreparationSeconds] = useState(5);
 	const [isPreparing, setIsPreparing] = useState(false);
-	const [isRecording, setIsRecording] = useState(false);
 	const [isPaused, setIsPaused] = useState(false);
 	const [waveform, setWaveform] = useState(() => Array.from({ length: 32 }, () => 0.12));
-	const [micError, setMicError] = useState("");
-	const audioContextRef = useRef(null);
-	const analyserRef = useRef(null);
-	const streamRef = useRef(null);
-	const animationFrameRef = useRef(null);
-	const recordingRef = useRef(false);
+	const [saveNotice, setSaveNotice] = useState(null);
+	const { audioLevel, error: speechError, isListening, saveTranscript, start, stop, transcript } = useSpeechToText();
+	const isRecording = isListening;
+	const stopAndSave = async () => {
+		stop();
+		setSaveNotice({ type: "saving", message: "Saving transcript..." });
+		try {
+			const savedTranscript = await saveTranscript({
+				userId: selectedUserId,
+				durationSeconds: (sessionDuration || 60) - seconds,
+				topic: selected.title,
+			});
+			if (!savedTranscript) throw new Error("No transcript was available to save");
+			setSaveNotice({ type: "success", message: `Transcript saved for ${selectedUser}.` });
+		} catch (error) {
+			console.error("Transcript save error:", error);
+			setSaveNotice({ type: "error", message: "Transcript could not be saved. Please try again." });
+		}
+	};
 
 	useEffect(() => {
 		const loadTopics = async () => {
@@ -81,6 +96,13 @@ const SpinWheel = () => {
 	}, [isRecording, isPaused, seconds]);
 
 	useEffect(() => {
+		if (isRecording && seconds === 0) {
+			stopAndSave();
+			setIsPaused(false);
+		}
+	}, [isRecording, seconds]);
+
+	useEffect(() => {
 		if (!isPreparing) return undefined;
 		const timer = window.setInterval(() => {
 			setPreparationSeconds((value) => {
@@ -94,11 +116,10 @@ const SpinWheel = () => {
 		return () => window.clearInterval(timer);
 	}, [isPreparing]);
 
-	useEffect(() => () => {
-		if (animationFrameRef.current) window.cancelAnimationFrame(animationFrameRef.current);
-		streamRef.current?.getTracks().forEach((track) => track.stop());
-		audioContextRef.current?.close();
-	}, []);
+	useEffect(() => {
+		if (!isRecording) return;
+		setWaveform(Array.from({ length: 32 }, (_, index) => Math.max(0.12, audioLevel * (0.6 + ((index % 5) * 0.1)) + 0.08)));
+	}, [audioLevel, isRecording]);
 
 	const spin = () => {
 		const topicIndex = Math.floor(Math.random() * topics.length);
@@ -120,42 +141,14 @@ const SpinWheel = () => {
 		document.getElementById("timer")?.scrollIntoView({ behavior: "smooth" });
 	};
 
-	const animateWaveform = () => {
-		const analyser = analyserRef.current;
-		if (!analyser || !recordingRef.current) return;
-		const data = new Uint8Array(analyser.frequencyBinCount);
-		analyser.getByteFrequencyData(data);
-		const bars = Array.from({ length: 32 }, (_, index) => Math.max(0.12, (data[index * 2] || 0) / 255));
-		setWaveform(bars);
-		animationFrameRef.current = window.requestAnimationFrame(animateWaveform);
-	};
-
 	const toggleRecording = async () => {
 		if (isRecording) {
-			recordingRef.current = false;
-			setIsRecording(false);
-			streamRef.current?.getTracks().forEach((track) => track.stop());
+			await stopAndSave();
 			return;
 		}
-
+		setSaveNotice(null);
 		if (seconds === 0) setSeconds(sessionDuration || 60);
-		setMicError("");
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-			const analyser = audioContext.createAnalyser();
-			analyser.fftSize = 64;
-			audioContext.createMediaStreamSource(stream).connect(analyser);
-			streamRef.current = stream;
-			audioContextRef.current = audioContext;
-			analyserRef.current = analyser;
-			recordingRef.current = true;
-			setIsRecording(true);
-			window.requestAnimationFrame(animateWaveform);
-		} catch (error) {
-			setMicError("Microphone access is needed for the live waveform.");
-			console.error("Microphone error:", error);
-		}
+		await start();
 		setIsPaused(false);
 	};
 
@@ -204,18 +197,20 @@ const SpinWheel = () => {
 				<section className="practice-section recording-section">
 					<div className="section-heading"><div><h1>3. Recording</h1><p>Your microphone is ready</p></div><span className="step-pill">STEP 3 OF 3</span></div>
 					<div className="recording-row">
-						<div className="recording-visual">
+							<div className="recording-visual">
 							<div className="recording-wave" aria-label="Live voice waveform">
 								{waveform.map((height, index) => <span key={index} style={{ height: `${12 + height * 42}px` }} />)}
 							</div>
 							<button className={`mic-button ${isRecording ? "recording" : ""}`} onClick={toggleRecording} aria-label={isRecording ? "Stop recording" : "Start recording"}><span>♩</span></button>
 						</div>
-						<div className="recording-info">
+							<div className="recording-info">
+								{transcript && <p className="speech-transcript" aria-live="polite">{transcript}</p>}
 							<div className="recording-status"><strong>{formatTime((sessionDuration || 60) - seconds)}</strong><small>{isRecording ? "Recording..." : "Ready to record"}</small></div>
-							<div className="recording-actions"><button className="primary-button start-recording-button" onClick={toggleRecording} disabled={isRecording}>▶ Start</button><button className="secondary-button" onClick={() => setIsPaused((value) => !value)} disabled={!isRecording}>{isPaused ? "▶ Resume" : "Ⅱ Pause"}</button><button className="stop-button" onClick={() => { setIsRecording(false); setIsPaused(false); }}>■ Stop</button></div>
+								<div className="recording-actions"><button className="primary-button start-recording-button" onClick={toggleRecording} disabled={isRecording}>▶ Start</button><button className="secondary-button" onClick={() => setIsPaused((value) => !value)} disabled={!isRecording}>{isPaused ? "▶ Resume" : "Ⅱ Pause"}</button><button className="stop-button" onClick={() => { stopAndSave(); setIsPaused(false); }}>■ Stop</button></div>
 						</div>
 					</div>
-					{micError && <p className="mic-error">{micError}</p>}
+					{speechError && <p className="mic-error">{speechError}</p>}
+					{saveNotice && <p className={`save-notice ${saveNotice.type}`} role={saveNotice.type === "error" ? "alert" : "status"}>{saveNotice.message}</p>}
 				</section>
 			</div>
 		</main>

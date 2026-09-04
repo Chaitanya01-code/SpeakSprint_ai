@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./analytics.css";
 
 const Analytics = () => {
@@ -85,11 +85,36 @@ const Analytics = () => {
     },
   };
 
-  const currentData = {
+  const [currentData, setCurrentData] = useState({
     metrics: { avgScore: null, challenges: null, speakingTime: null, bestScore: null },
     trendPoints: [],
     skills: [],
-  };
+  });
+
+  useEffect(() => {
+    if (!authUser?.user_id) return;
+    fetch(`http://localhost:8000/api/v1/transcripts?user_id=${authUser.user_id}`)
+      .then((response) => response.json())
+      .then((transcripts) => {
+        const seconds = transcripts.reduce((total, item) => total + item.duration_seconds, 0);
+        setCurrentData({
+          metrics: {
+            avgScore: "-",
+            challenges: transcripts.length,
+            speakingTime: `${Math.floor(seconds / 60)}m`,
+            bestScore: "-",
+          },
+          trendPoints: transcripts.slice(0, 7).reverse().map((item, index) => ({
+            score: 0,
+            date: new Date(item.created_at).toLocaleDateString(),
+            x: 45 + index * 95,
+            y: 205,
+          })),
+          skills: [],
+        });
+      })
+      .catch((error) => console.warn("Unable to load analytics", error));
+  }, [authUser?.user_id]);
 
   // Radar chart geometry calculations
   const radarCenter = { x: 135, y: 110 };

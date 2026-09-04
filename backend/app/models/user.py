@@ -31,6 +31,7 @@ class UserResponse(BaseModel):
 	domain: Optional[str]
 	is_active: bool
 	is_admin: bool
+	presence_status: str
 	role: str
 	created_at: datetime
 

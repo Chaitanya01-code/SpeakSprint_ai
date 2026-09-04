@@ -14,6 +14,7 @@ class User(Base):
     domain = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
+    presence_status = Column(String(20), default="logged_out", nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     role = Column(String(50), default="user", nullable=False)
 
@@ -21,10 +22,8 @@ class User(Base):
 # Import all models to ensure they are registered with Base before creating tables
 from .topicdb import Topic
 from .speechdb import TextModel
-<<<<<<< HEAD
 from ..models.attempt import Attempt
-=======
->>>>>>> 9d880514f3d030dab72fef0e5224d972c6d0d684
+from ..models.transcript import SpeechTranscript
 
 # Create all tables in the database
 create_all_tables()
@@ -36,6 +35,11 @@ def ensure_domain_column():
     if "domain" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE users ADD COLUMN domain VARCHAR(255)"))
+
+    columns = {column["name"] for column in inspect(engine).get_columns("users")}
+    if "presence_status" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE users ADD COLUMN presence_status VARCHAR(20) DEFAULT 'logged_out' NOT NULL"))
 
 
 ensure_domain_column()

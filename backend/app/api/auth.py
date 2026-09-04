@@ -97,6 +97,9 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
     if not password_matches:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
+    user.presence_status = "active"
+    db.commit()
+
     return {
         "message": "Admin signed in successfully" if user.is_admin else "Signed in successfully",
         "user_id": user.id,
@@ -104,5 +107,15 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
         "username": user.username,
         "email": user.email,
         "domain": user.domain,
+        "presence_status": user.presence_status,
     }
+
+
+@router.post("/logout")
+async def logout(user_id: int, db: Session = Depends(get_db)):
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user:
+        user.presence_status = "logged_out"
+        db.commit()
+    return {"message": "Logged out"}
 

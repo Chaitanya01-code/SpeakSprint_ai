@@ -25,7 +25,9 @@ export default function Home() {
   const openSpinWheel = (event) => {
     event.preventDefault();
     if (!selectedUser) return;
-    localStorage.setItem('selectedUser', selectedUser);
+    const selectedUserRecord = users.find((user) => String(user.id) === selectedUser);
+    localStorage.setItem('selectedUser', selectedUserRecord?.username || selectedUserRecord?.email || selectedUser);
+    localStorage.setItem('selectedUserId', selectedUser);
     window.location.href = '/practice';
   };
 
@@ -85,7 +87,7 @@ export default function Home() {
               <label htmlFor="home-user-select">Available users</label>
               <select id="home-user-select" value={selectedUser} onChange={(event) => setSelectedUser(event.target.value)} required autoFocus>
                 <option value="" disabled>{usersLoading ? 'Loading users...' : 'Choose your name'}</option>
-                {users.map((user) => <option key={user.id} value={user.username || user.email}>{user.username || user.email}</option>)}
+                {users.map((user) => <option key={user.id} value={String(user.id)}>{user.username || user.email}</option>)}
               </select>
               {usersError && <span className="home-user-modal-error" role="alert">{usersError}</span>}
               {!usersLoading && !usersError && users.length === 0 && <span className="home-user-modal-error" role="alert">No active users are available.</span>}

@@ -27,7 +27,10 @@ const UserSelection = () => {
 	const handleContinue = (event) => {
 		event.preventDefault();
 		if (selectedName) {
-			window.location.hash = "#/practice";
+			const selectedUser = users.find((user) => (user.username || user.email) === selectedName);
+			localStorage.setItem("selectedUser", selectedName);
+			if (selectedUser) localStorage.setItem("selectedUserId", String(selectedUser.id));
+			window.location.href = "/practice";
 		}
 	};
 

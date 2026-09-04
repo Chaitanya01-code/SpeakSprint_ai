@@ -2,13 +2,13 @@
 
 import math
 import re
-from typing import Any
+from typing import Any, Dict
 
 
 _WORD_PATTERN = re.compile(r"\b[\w']+\b", re.UNICODE)
 
 
-def calculate_fluency(transcript: str, duration_seconds: float) -> dict[str, Any]:
+def calculate_fluency(transcript: str, duration_seconds: float) -> Dict[str, Any]:
     """Calculate word count, words per minute, and a pace-based fluency score.
 
     ``duration_seconds`` should be the amount of time represented by the

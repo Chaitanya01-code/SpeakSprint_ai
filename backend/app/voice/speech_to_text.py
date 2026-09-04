@@ -2,11 +2,14 @@ import asyncio
 import json
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
-from deepgram import DeepgramClient, LiveOptions, LiveTranscriptionEvents
 from dotenv import load_dotenv
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from sqlalchemy import select
+
+from app.core.database import SessionLocal
+from app.core.userdb import User
 
 
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
@@ -19,7 +22,7 @@ def _deepgram_api_key() -> Optional[str]:
 
 
 @router.get("/speech-to-text", tags=["Speech-to-text"])
-async def speech_to_text_info() -> dict[str, str]:
+async def speech_to_text_info() -> Dict[str, str]:
     """Describe the WebSocket endpoint used for live transcription."""
     return {
         "websocket_url": "/ws/speech-to-text",
@@ -33,13 +36,32 @@ async def speech_to_text(websocket: WebSocket) -> None:
     """Stream binary audio from the browser to Deepgram and return transcripts."""
     await websocket.accept()
 
+    user_id = websocket.query_params.get("user_id")
+    previous_presence = None
+    if user_id and user_id.isdigit():
+        db = SessionLocal()
+        try:
+            user = db.scalar(select(User).where(User.id == int(user_id)))
+            if user:
+                previous_presence = user.presence_status
+                user.presence_status = "speaking"
+                db.commit()
+        finally:
+            db.close()
+
+    try:
+        from deepgram import DeepgramClient, LiveOptions, LiveTranscriptionEvents
+    except (ImportError, SyntaxError):
+        await websocket.close(code=1011, reason="Deepgram SDK is unavailable for this Python runtime")
+        return
+
     api_key = _deepgram_api_key()
     if not api_key:
         await websocket.close(code=1011, reason="DEEPGRAM_API_KEY is not configured")
         return
 
     event_loop = asyncio.get_running_loop()
-    transcript_queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
+    transcript_queue: asyncio.Queue = asyncio.Queue()
     deepgram = DeepgramClient(api_key=api_key)
     connection = deepgram.listen.live.v("1")
 
@@ -116,5 +138,14 @@ async def speech_to_text(websocket: WebSocket) -> None:
         receive_task.cancel()
         transcript_task.cancel()
         connection.finish()
+        if user_id and user_id.isdigit() and previous_presence is not None:
+            db = SessionLocal()
+            try:
+                user = db.scalar(select(User).where(User.id == int(user_id)))
+                if user and user.presence_status == "speaking":
+                    user.presence_status = previous_presence
+                    db.commit()
+            finally:
+                db.close()
         if websocket.client_state.name != "DISCONNECTED":
             await websocket.close()

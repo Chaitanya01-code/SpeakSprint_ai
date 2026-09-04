@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./leaderboard.css";
 
-  const Leaderboard = () => {
+  const Leaderboard = ({ authUser }) => {
   // Timeframe selector state
   const [timeframe, setTimeframe] = useState("This Week");
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
@@ -280,22 +280,34 @@ import "./leaderboard.css";
       },
     ],
   };
-  // Sample recent attempts data for Recent Attempts section
-  const recentAttempts = [
-    { id: 1, title: "The Future of AI", date: "May 16, 2024", score: 88, status: "green" },
-    { id: 2, title: "Impact of Social Media", date: "May 15, 2024", score: 78, status: "orange" },
-    { id: 3, title: "Online Education", date: "May 14, 2024", score: 92, status: "green" },
-    { id: 4, title: "Sustainable Living", date: "May 13, 2024", score: 85, status: "green" },
-  ];
+  const [currentRankings, setCurrentRankings] = useState([]);
 
-  // Sample achievements data for Leaderboard page (mirroring dashboard achievements)
-  const achievements = [
-    { id: "first-challenge", title: "First Challenge", unlocked: "May 10, 2024", desc: "Completed your first 60-second speaking sprint", type: "first" },
-    { id: "streak-7", title: "7-Day Streak", unlocked: "May 16, 2024", desc: "Practiced speaking consistently for 7 days in a row", type: "streak" },
-    { id: "top-speaker", title: "Top Speaker", unlocked: "May 14, 2024", desc: "Scored 90+ points across multiple speech challenges", type: "speaker" },
-    { id: "grammar-master", title: "Grammar Master", unlocked: "May 15, 2024", desc: "Achieved 95%+ grammatical precision in assessments", type: "grammar" },
-  ];
-  const currentRankings = [];
+  useEffect(() => {
+    fetch("http://localhost:8000/api/v1/attempts")
+      .then((response) => response.json())
+      .then((attempts) => {
+        const grouped = new Map();
+        attempts.forEach((attempt) => {
+          if (attempt.score === null) return;
+          const current = grouped.get(attempt.learner) || { scores: [], latest: attempt };
+          current.scores.push(attempt.score);
+          grouped.set(attempt.learner, current);
+        });
+        setCurrentRankings(Array.from(grouped.entries()).map(([name, value]) => ({
+          name,
+          score: Math.round(value.scores.reduce((sum, score) => sum + score, 0) / value.scores.length),
+          streak: 0,
+          isCurrentUser: name === authUser?.username,
+          department: "-",
+          college: "-",
+          avatarBg: "#E0E7FF",
+          gender: "male",
+          wpm: 0,
+          clarity: "-",
+        })).sort((left, right) => right.score - left.score).map((item, index) => ({ ...item, rank: index + 1 })));
+      })
+      .catch((error) => console.warn("Unable to load leaderboard", error));
+  }, [authUser?.username]);
   const displayedRankings = isExpanded ? currentRankings : currentRankings.slice(0, 5);
 
   // Render Illustrated Avatar corresponding to gender/type

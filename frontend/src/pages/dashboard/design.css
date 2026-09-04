@@ -1307,3 +1307,21 @@
     min-width: 45%;
   }
 }
+
+.ss-live-transcript {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #5D5FEF;
+  border-radius: 6px;
+  background: #F5F6FF;
+  color: #4B5575;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.ss-live-transcript-error {
+  border-left-color: #EF4444;
+  background: #FFF5F5;
+  color: #B42318;
+}

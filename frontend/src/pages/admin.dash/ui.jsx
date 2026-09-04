@@ -222,6 +222,24 @@ function Icon({ name, size = 18 }) {
 
 function DashboardHome({ onNavigate }) {
   const [totalUsers, setTotalUsers] = useState(null);
+  const [dashboardUsers, setDashboardUsers] = useState([]);
+  const [dashboardAttempts, setDashboardAttempts] = useState([]);
+  const [dashboardTopics, setDashboardTopics] = useState([]);
+
+  const liveMetrics = metrics.map((metric) => {
+    if (metric.label === "Total Users") return { ...metric, value: totalUsers === null ? "-" : totalUsers.toLocaleString() };
+    if (metric.label === "Total Attempts" || metric.label === "Challenges Completed") return { ...metric, value: dashboardAttempts.length.toLocaleString() };
+    if (metric.label === "Transcriptions") return { ...metric, value: "-" };
+    if (metric.label === "Avg. Score") {
+      const scored = dashboardAttempts.filter((attempt) => attempt.score !== null);
+      return { ...metric, value: scored.length ? (scored.reduce((sum, attempt) => sum + attempt.score, 0) / scored.length).toFixed(1) : "-" };
+    }
+    if (metric.label === "Total Speaking Time") {
+      const seconds = dashboardAttempts.reduce((sum, attempt) => sum + (Number.parseInt(attempt.duration, 10) || 0), 0);
+      return { ...metric, value: seconds ? (seconds / 3600).toFixed(1) : "-", suffix: seconds ? "h" : "" };
+    }
+    return { ...metric, value: "-", change: "" };
+  });
 
   useEffect(() => {
     const loadUserCount = async () => {
@@ -230,12 +248,23 @@ function DashboardHome({ onNavigate }) {
         if (!response.ok) return;
         const users = await response.json();
         setTotalUsers(users.length);
+        setDashboardUsers(users.filter((user) => !user.is_admin));
       } catch (error) {
         console.warn("Unable to load total user count", error);
       }
     };
 
+    const loadDashboardData = async () => {
+      const [attemptResponse, topicResponse] = await Promise.all([
+        fetch("http://localhost:8000/api/v1/attempts"),
+        fetch("http://localhost:8000/api/v1/topics"),
+      ]);
+      if (attemptResponse.ok) setDashboardAttempts(await attemptResponse.json());
+      if (topicResponse.ok) setDashboardTopics(await topicResponse.json());
+    };
+
     loadUserCount();
+    loadDashboardData().catch((error) => console.warn("Unable to load dashboard data", error));
   }, []);
 
   return (
@@ -258,7 +287,7 @@ function DashboardHome({ onNavigate }) {
         </div>
       </div>
       <section className="admin-metrics-grid">
-        {metrics.map((metric) => (
+        {liveMetrics.map((metric) => (
           <article className="admin-metric-card" key={metric.label}>
             <div className={`admin-metric-icon ${metric.tone}`}>
               <Icon name={metric.icon} size={21} />
@@ -266,9 +295,7 @@ function DashboardHome({ onNavigate }) {
             <div>
               <span>{metric.label}</span>
               <strong>
-                {metric.label === "Total Users" && totalUsers !== null
-                  ? totalUsers.toLocaleString()
-                  : metric.value}
+                {metric.value}
                 <small>{metric.suffix}</small>
               </strong>
               <em>
@@ -374,56 +401,16 @@ function DashboardHome({ onNavigate }) {
             </button>
           </div>
           <ul className="admin-activity-list">
-            <li>
-              <span className="activity-icon purple">
-                <Icon name="users" size={15} />
-              </span>
-              <div>
-                <strong>New user registered</strong>
-                <small>Rahul Verma joined the platform</small>
-              </div>
-              <time>2m ago</time>
-            </li>
-            <li>
-              <span className="activity-icon green">
-                <Icon name="check" size={15} />
-              </span>
-              <div>
-                <strong>New challenge created</strong>
-                <small>"The Future of AI" challenge added</small>
-              </div>
-              <time>15m ago</time>
-            </li>
-            <li>
-              <span className="activity-icon orange">
-                <Icon name="card" size={15} />
-              </span>
-              <div>
-                <strong>System backup completed</strong>
-                <small>Daily backup completed successfully</small>
-              </div>
-              <time>1h ago</time>
-            </li>
-            <li>
-              <span className="activity-icon blue">
-                <Icon name="star" size={15} />
-              </span>
-              <div>
-                <strong>High scoring attempt</strong>
-                <small>Ananya Sharma scored 96/100</small>
-              </div>
-              <time>2h ago</time>
-            </li>
-            <li>
-              <span className="activity-icon green">
-                <Icon name="users" size={15} />
-              </span>
-              <div>
-                <strong>New institution onboarded</strong>
-                <small>"ABC College" joined SpeakSprint AI</small>
-              </div>
-              <time>3h ago</time>
-            </li>
+            {dashboardAttempts.slice(0, 5).map((attempt) => (
+              <li key={attempt.id}>
+                <span className="activity-icon blue"><Icon name="mic" size={15} /></span>
+                <div>
+                  <strong>Speaking attempt recorded</strong>
+                  <small>{attempt.learner} · {attempt.challenge}</small>
+                </div>
+                <time>{new Date(attempt.date).toLocaleDateString()}</time>
+              </li>
+            ))}
           </ul>
         </article>
       </section>
@@ -449,23 +436,23 @@ function DashboardHome({ onNavigate }) {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
-                <tr key={user[0]}>
+              {dashboardUsers.slice(0, 5).map((user, index) => (
+                <tr key={user.id}>
                   <td>
                     <span className={`rank rank-${index + 1}`}>
                       {index + 1}
                     </span>
                   </td>
                   <td>
-                    <span className="user-avatar">{user[0].slice(0, 1)}</span>
+                    <span className="user-avatar">{(user.username || user.email).slice(0, 1)}</span>
                     <span className="table-user">
-                      <b>{user[0]}</b>
-                      <small>{user[1]}</small>
+                      <b>{user.username || "Unnamed user"}</b>
+                      <small>{user.email}</small>
                     </span>
                   </td>
-                  <td>{user[2]}</td>
-                  <td>{user[3]}</td>
-                  <td>{user[4]}</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
                 </tr>
               ))}
             </tbody>
@@ -473,28 +460,15 @@ function DashboardHome({ onNavigate }) {
         </article>
         <article className="admin-card admin-topics-card">
           <div className="admin-card-heading">
-            <h2>Popular Topics</h2>
-            <button
-              onClick={() => onNavigate("topics")}
-              className="admin-link-button"
-            >
-              View All
-            </button>
+            <h2>Available Topics</h2>
+            <button onClick={() => onNavigate("topics")} className="admin-link-button">View All</button>
           </div>
-          {[
-            ["The Future of AI", "4,231", "78.6"],
-            ["Social Media Impact", "3,982", "74.2"],
-            ["Online Education", "3,421", "72.8"],
-            ["Climate Change", "2,987", "71.3"],
-            ["Self Confidence", "2,645", "70.1"],
-          ].map((topic, index) => (
-            <div className="topic-row" key={topic[0]}>
-              <b>{topic[0]}</b>
-              <span>{topic[1]}</span>
-              <span>{topic[2]}</span>
-              <i>
-                <em style={{ width: `${76 - index * 12}%` }} />
-              </i>
+          {dashboardTopics.slice(0, 5).map((topic) => (
+            <div className="topic-row" key={topic.id}>
+              <b>{topic.topic_name}</b>
+              <span>{topic.description || "Available"}</span>
+              <span>-</span>
+              <i><em style={{ width: "100%" }} /></i>
             </div>
           ))}
         </article>
@@ -541,6 +515,7 @@ function ManagementPage({ page }) {
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
   const [attemptRows, setAttemptRows] = useState([]);
+  const [leaderboardRows, setLeaderboardRows] = useState([]);
   const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [attemptsError, setAttemptsError] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -586,9 +561,9 @@ function ManagementPage({ page }) {
   }, [page]);
 
   useEffect(() => {
-    if (page !== "challenges" && page !== "users" && page !== "attempts") return;
+    if (page !== "challenges" && page !== "users" && page !== "attempts" && page !== "leaderboard") return;
 
-    if (page === "attempts") {
+    if (page === "attempts" || page === "leaderboard") {
       const loadAttempts = async () => {
         setAttemptsLoading(true);
         setAttemptsError("");
@@ -606,6 +581,19 @@ function ManagementPage({ page }) {
               new Date(attempt.date).toLocaleDateString(),
             ],
           })));
+          if (page === "leaderboard") {
+            const grouped = new Map();
+            attempts.forEach((attempt) => {
+              const current = grouped.get(attempt.learner) || { count: 0, best: null };
+              current.count += 1;
+              if (attempt.score !== null) current.best = Math.max(current.best ?? attempt.score, attempt.score);
+              grouped.set(attempt.learner, current);
+            });
+            setLeaderboardRows(Array.from(grouped.entries()).sort((left, right) => (right[1].best ?? -1) - (left[1].best ?? -1)).map(([learner, data], index) => ({
+              id: learner,
+              values: [String(index + 1), learner, data.best === null ? "-" : `${data.best}/100`, `${data.count} attempts`, "-"],
+            })));
+          }
         } catch (error) {
           setAttemptsError(error.message);
           setAttemptRows([]);
@@ -634,7 +622,11 @@ function ManagementPage({ page }) {
                 user.domain || "Independent",
                 user.role || "user",
                 "-",
-                user.is_active ? "Active" : "Inactive",
+                user.presence_status === "speaking"
+                  ? "Speaking"
+                  : user.presence_status === "active"
+                    ? "Active"
+                    : "Logged out",
               ],
             })),
           );
@@ -646,7 +638,8 @@ function ManagementPage({ page }) {
         }
       };
       loadUsers();
-      return;
+      const refreshUsers = window.setInterval(loadUsers, 5000);
+      return () => window.clearInterval(refreshUsers);
     }
 
     const loadTopics = async () => {
@@ -1034,7 +1027,9 @@ function ManagementPage({ page }) {
         ? userRows
         : page === "attempts"
           ? attemptRows
-        : config.rows;
+          : page === "leaderboard"
+            ? leaderboardRows
+        : [];
   const loading =
     page === "challenges"
       ? topicsLoading
@@ -1042,6 +1037,8 @@ function ManagementPage({ page }) {
         ? usersLoading
         : page === "attempts"
           ? attemptsLoading
+          : page === "leaderboard"
+            ? attemptsLoading
         : false;
   const loadError =
     page === "challenges"
@@ -1050,6 +1047,8 @@ function ManagementPage({ page }) {
         ? usersError
         : page === "attempts"
           ? attemptsError
+          : page === "leaderboard"
+            ? attemptsError
           : "";
   return (
     <div className="admin-management-page">
@@ -1436,7 +1435,11 @@ function ManagementPage({ page }) {
 const AdminDashboard = () => {
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
+    if (authUser?.user_id) {
+      await fetch(`http://localhost:8000/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
+    }
     localStorage.removeItem("authUser");
     window.location.href = "/login";
   };
