@@ -9,6 +9,7 @@ from typing import Optional, List
 # Import database components
 from ..core.topicdb import Topic
 from ..core.database import get_db
+from ..core.security import get_current_user, require_admin
 
 # Create router
 router = APIRouter(prefix="/api/v1", tags=["topics"])
@@ -34,14 +35,14 @@ class TopicResponse(TopicBase):
 
 # API Routes
 @router.get("/topics", response_model=List[TopicResponse])
-async def get_topics(db: Session = Depends(get_db)):
+async def get_topics(db: Session = Depends(get_db), _user=Depends(get_current_user)):
     """Get all topics"""
     topics = db.scalars(select(Topic)).all()
     return topics
 
 
 @router.get("/topics/{topic_id}", response_model=TopicResponse)
-async def get_topic(topic_id: int, db: Session = Depends(get_db)):
+async def get_topic(topic_id: int, db: Session = Depends(get_db), _user=Depends(get_current_user)):
     """Get a specific topic by ID"""
     topic = db.scalar(select(Topic).where(Topic.id == topic_id))
     if not topic:
@@ -50,7 +51,7 @@ async def get_topic(topic_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/topics", response_model=TopicResponse)
-async def create_topic(new_topic: TopicCreate, db: Session = Depends(get_db)):
+async def create_topic(new_topic: TopicCreate, db: Session = Depends(get_db), _admin=Depends(require_admin)):
     """Create a new topic"""
     db_topic = Topic(topic_name=new_topic.topic_name, description=new_topic.description)
     db.add(db_topic)
@@ -64,7 +65,7 @@ async def create_topic(new_topic: TopicCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/topics/{topic_id}", response_model=TopicResponse)
-async def update_topic(topic_id: int, updated_topic: TopicCreate, db: Session = Depends(get_db)):
+async def update_topic(topic_id: int, updated_topic: TopicCreate, db: Session = Depends(get_db), _admin=Depends(require_admin)):
     """Update an existing topic"""
     db_topic = db.scalar(select(Topic).where(Topic.id == topic_id))
     if not db_topic:
@@ -83,7 +84,7 @@ async def update_topic(topic_id: int, updated_topic: TopicCreate, db: Session = 
 
 
 @router.delete("/topics/{topic_id}", status_code=204)
-async def delete_topic(topic_id: int, db: Session = Depends(get_db)):
+async def delete_topic(topic_id: int, db: Session = Depends(get_db), _admin=Depends(require_admin)):
     """Delete a topic"""
     db_topic = db.scalar(select(Topic).where(Topic.id == topic_id))
     if not db_topic:

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { API_BASE_URL, authFetch } from "../lib/api";
 
 const getSpeechSocketUrl = () => {
   const configuredUrl = import.meta.env.VITE_BACKEND_URL;
@@ -6,21 +7,13 @@ const getSpeechSocketUrl = () => {
     return `${configuredUrl.replace(/^http/, "ws")}/ws/speech-to-text${getUserQuery()}`;
   }
 
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const port = window.location.port === "5173" || window.location.port === "4173" ? ":8000" : "";
-  return `${protocol}//${window.location.hostname}${port}/ws/speech-to-text${getUserQuery()}`;
+  return `${API_BASE_URL.replace(/^http/, "ws")}/ws/speech-to-text${getUserQuery()}`;
 };
 
 const getUserQuery = () => {
   const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
   const userId = localStorage.getItem("selectedUserId") || authUser?.user_id;
   return userId ? `?user_id=${encodeURIComponent(userId)}` : "";
-};
-
-const getBackendHttpUrl = () => {
-  if (import.meta.env.VITE_BACKEND_URL) return import.meta.env.VITE_BACKEND_URL;
-  const port = window.location.port === "5173" || window.location.port === "4173" ? ":8000" : "";
-  return `${window.location.protocol}//${window.location.hostname}${port}`;
 };
 
 const getRecorderOptions = () => {
@@ -139,7 +132,7 @@ export default function useSpeechToText() {
     const text = (latestTranscriptRef.current || transcript).trim();
     if (!userId || !text) return null;
 
-    const response = await fetch(`${getBackendHttpUrl()}/api/v1/transcripts`, {
+    const response = await authFetch("/api/v1/transcripts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

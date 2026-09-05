@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { selectedTopic, topics as defaultTopics } from "./topics";
 import useSpeechToText from "../../hooks/useSpeechToText";
 import "./spinwheel.css";
+import { authFetch } from "../../lib/api";
 
 const formatTime = (seconds) => {
 	const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -54,7 +55,7 @@ const SpinWheel = () => {
 	useEffect(() => {
 		const loadTopics = async () => {
 			try {
-				const response = await fetch("http://localhost:8000/api/v1/topics");
+				const response = await authFetch("/api/v1/topics");
 				if (!response.ok) return;
 				const data = await response.json();
 				const adminTopics = data
@@ -75,7 +76,7 @@ const SpinWheel = () => {
 	useEffect(() => {
 		const loadSessionDuration = async () => {
 			try {
-				const response = await fetch("http://localhost:8000/api/v1/settings/session-duration");
+				const response = await authFetch("/api/v1/settings/session-duration");
 				if (!response.ok) return;
 				const data = await response.json();
 				const nextDuration = Number(data.session_duration_seconds || 120);

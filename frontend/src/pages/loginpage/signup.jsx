@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./style.css";
+import { API_BASE_URL } from "../../lib/api";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -66,7 +67,7 @@ const SignUp = () => {
 
     try {
       // API call to backend
-      const response = await fetch("http://localhost:8000/register", {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

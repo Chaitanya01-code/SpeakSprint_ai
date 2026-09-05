@@ -1,5 +1,6 @@
 """Database model and API routes for speaking attempts."""
 from datetime import datetime
+import json
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -8,7 +9,10 @@ from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, select
 from sqlalchemy.orm import Session
 
 from ..core.database import Base, get_db
+from ..core.security import get_current_user, require_admin, require_user_or_admin
+from .transcript import SpeechTranscript
 from ..core.topicdb import Topic
+from ..core.userdb import User
 
 
 class Attempt(Base):
@@ -58,10 +62,8 @@ def _format_attempt(attempt, learner: Optional[str], challenge: Optional[str]) -
 
 
 @router.get("", response_model=List[AttemptResponse])
-async def get_attempts(db: Session = Depends(get_db)):
+async def get_attempts(db: Session = Depends(get_db), _admin: User = Depends(require_admin)):
     """Return completed attempts for the admin Attempts table."""
-    from ..core.userdb import User
-
     rows = db.execute(
         select(Attempt, User.username, User.email, Topic.topic_name)
         .join(User, User.id == Attempt.user_id)
@@ -75,10 +77,37 @@ async def get_attempts(db: Session = Depends(get_db)):
     ]
 
 
+@router.get("/leaderboard", response_model=List[AttemptResponse])
+async def get_leaderboard(db: Session = Depends(get_db), _user: User = Depends(get_current_user)):
+    """Return all evaluated user sessions for the shared leaderboard."""
+    rows = db.execute(
+        select(SpeechTranscript, User.username, User.email)
+        .join(User, User.id == SpeechTranscript.user_id)
+        .where(SpeechTranscript.evaluation_json.is_not(None))
+        .order_by(SpeechTranscript.created_at.desc())
+    ).all()
+    results = []
+    for transcript, username, email in rows:
+        evaluation = json.loads(transcript.evaluation_json)
+        results.append(AttemptResponse(
+            id=transcript.id,
+            learner=username or email,
+            challenge=transcript.topic or "Speaking practice",
+            score=evaluation.get("overall_score"),
+            duration=f"{transcript.duration_seconds} sec",
+            date=transcript.created_at,
+        ))
+    return results
+
+
 @router.post("", response_model=AttemptResponse, status_code=201)
-async def create_attempt(payload: AttemptCreate, db: Session = Depends(get_db)):
+async def create_attempt(
+    payload: AttemptCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Create a completed speaking attempt."""
-    from ..core.userdb import User
+    require_user_or_admin(payload.user_id, current_user)
 
     user = db.scalar(select(User).where(User.id == payload.user_id, User.is_active.is_(True)))
     if not user:

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./analytics.css";
+import { authFetch } from "../../lib/api";
 
-const Analytics = () => {
+const Analytics = ({ authUser }) => {
   // Timeframe dropdown state
   const [timeframe, setTimeframe] = useState("This Month");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -93,27 +94,50 @@ const Analytics = () => {
 
   useEffect(() => {
     if (!authUser?.user_id) return;
-    fetch(`http://localhost:8000/api/v1/transcripts?user_id=${authUser.user_id}`)
-      .then((response) => response.json())
-      .then((transcripts) => {
+    const loadAnalytics = async () => {
+      try {
+        const response = await authFetch(`/api/v1/transcripts?user_id=${authUser.user_id}`);
+        if (!response.ok) throw new Error("Unable to load analytics");
+        const transcripts = await response.json();
         const seconds = transcripts.reduce((total, item) => total + item.duration_seconds, 0);
-        setCurrentData({
+        const nextData = {
           metrics: {
-            avgScore: "-",
+            avgScore: transcripts.length ? (transcripts.reduce((total, item) => total + (item.evaluation?.overall_score || 0), 0) / transcripts.length).toFixed(1) : "-",
             challenges: transcripts.length,
             speakingTime: `${Math.floor(seconds / 60)}m`,
-            bestScore: "-",
+            bestScore: transcripts.length ? Math.max(...transcripts.map((item) => item.evaluation?.overall_score || 0)) : "-",
           },
           trendPoints: transcripts.slice(0, 7).reverse().map((item, index) => ({
-            score: 0,
+            score: Math.round(item.evaluation?.overall_score || 0),
             date: new Date(item.created_at).toLocaleDateString(),
             x: 45 + index * 95,
             y: 205,
           })),
-          skills: [],
-        });
-      })
-      .catch((error) => console.warn("Unable to load analytics", error));
+          skills: [
+            { name: "Fluency", score: 0, angle: -90 },
+            { name: "Grammar", score: 0, angle: -30 },
+            { name: "Vocabulary", score: 0, angle: 30 },
+            { name: "Pronunciation", score: 0, angle: 90 },
+            { name: "Speed", score: 0, angle: 150 },
+            { name: "Relevance", score: 0, angle: 210 },
+          ].map((skill) => ({
+            ...skill,
+            score: transcripts.length
+              ? Math.round(transcripts.reduce((total, item) => total + (item.evaluation?.skill_scores?.[skill.name === "Speed" ? "speaking_speed" : skill.name === "Relevance" ? "topic_relevance" : skill.name.toLowerCase()] || 0), 0) / transcripts.length)
+              : 0,
+          })),
+        };
+        setCurrentData((current) =>
+          JSON.stringify(current) === JSON.stringify(nextData) ? current : nextData,
+        );
+      } catch (error) {
+        console.warn("Unable to load analytics", error);
+      }
+    };
+
+    loadAnalytics();
+    const refreshTimer = window.setInterval(loadAnalytics, 5000);
+    return () => window.clearInterval(refreshTimer);
   }, [authUser?.user_id]);
 
   // Radar chart geometry calculations

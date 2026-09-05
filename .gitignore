@@ -1,0 +1,34 @@
+# Python environments and caches
+.venv/
+venv/
+**/.venv/
+**/venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Local databases and runtime output
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+coverage/
+
+# Local editor and operating system files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store

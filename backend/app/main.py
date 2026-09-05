@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,17 +10,21 @@ from app.models import topic
 from app.models import user
 from app.models import attempt
 from app.models import transcript
-from app.core import initialize_admin_user, initialize_default_settings
+from app.core import create_all_tables, initialize_admin_user, initialize_default_settings
 from app.voice.speech_to_text import router as speech_to_text_router
 
-app = FastAPI()
-
-# Initialize admin user on startup
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Initialize database objects and seed data once when the app starts."""
+    create_all_tables()
+    transcript.ensure_transcript_analysis_columns()
     initialize_admin_user()
     initialize_default_settings()
     transcript.sync_transcripts_to_attempts()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 # Include routers
 app.include_router(auth.router)

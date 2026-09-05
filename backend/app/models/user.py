@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..core.database import get_db
 from ..core.userdb import User
+from ..core.security import get_current_user, require_admin
 
 
 router = APIRouter(prefix="/api/v1/users", tags=["users"])
@@ -40,12 +41,12 @@ class UserResponse(BaseModel):
 
 
 @router.get("", response_model=List[UserResponse])
-async def get_users(db: Session = Depends(get_db)):
+async def get_users(db: Session = Depends(get_db), _current_user: User = Depends(get_current_user)):
 	return db.scalars(select(User).order_by(User.created_at.desc())).all()
 
 
 @router.post("", response_model=UserResponse, status_code=201)
-async def create_user(new_user: UserCreate, db: Session = Depends(get_db)):
+async def create_user(new_user: UserCreate, db: Session = Depends(get_db), _admin: User = Depends(require_admin)):
 	name = new_user.name.strip()
 	email = new_user.email.strip().lower()
 	domain = new_user.domain.strip() if new_user.domain else None
@@ -77,7 +78,7 @@ async def create_user(new_user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.delete("/{user_id}", status_code=204)
-async def delete_user(user_id: int, db: Session = Depends(get_db)):
+async def delete_user(user_id: int, db: Session = Depends(get_db), _admin: User = Depends(require_admin)):
 	user = db.scalar(select(User).where(User.id == user_id))
 	if not user:
 		raise HTTPException(status_code=404, detail="User not found")

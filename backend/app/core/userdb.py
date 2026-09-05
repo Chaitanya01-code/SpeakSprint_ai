@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, inspect, or_, text
-from .database import Base, SessionLocal, create_all_tables, engine
+from .database import Base, SessionLocal, engine
 
 
 class User(Base):
@@ -24,10 +24,6 @@ from .topicdb import Topic
 from .speechdb import TextModel
 from ..models.attempt import Attempt
 from ..models.transcript import SpeechTranscript
-
-# Create all tables in the database
-create_all_tables()
-
 
 def ensure_domain_column():
     """Add the domain column for databases created before domain was introduced."""

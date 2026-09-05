@@ -6,13 +6,14 @@ import Achievements from "../achievements/ui";
 import Profile from "../profile/ui";
 import useSpeechToText from "../../hooks/useSpeechToText";
 import "./design.css";
+import { authFetch } from "../../lib/api";
 
 const Dashboard = ({ authUser }) => {
   const userName = authUser?.username || null;
   const userEmail = authUser?.email || null;
   const displayName = userName || "Speaker";
   const avatarInitial = displayName.slice(0, 1).toUpperCase();
-  const dashboardData = {
+  const [dashboardData, setDashboardData] = useState({
     averageScore: null,
     bestScore: null,
     challengesCompleted: null,
@@ -21,7 +22,7 @@ const Dashboard = ({ authUser }) => {
     skills: null,
     recentAttempts: null,
     achievements: null,
-  };
+  });
 
   // Navigation active state
   const [activeNav, setActiveNav] = useState("Dashboard");
@@ -34,7 +35,7 @@ const Dashboard = ({ authUser }) => {
 
   const handleLogout = async () => {
     if (authUser?.user_id) {
-      await fetch(`http://localhost:8000/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
+      await authFetch(`/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
     }
     localStorage.removeItem("authUser");
     window.location.href = "/login";
@@ -86,7 +87,7 @@ const Dashboard = ({ authUser }) => {
   };
 
   // Skill Overview Radar Chart Geometry (6 Axes matching image)
-  const radarSkills = [];
+  const [radarSkills, setRadarSkills] = useState([]);
 
   const radarCenter = { x: 120, y: 95 };
   const radarRadius = 62;
@@ -119,10 +120,64 @@ const Dashboard = ({ authUser }) => {
   const hexagonLevels = [0.25, 0.5, 0.75, 1.0];
 
   // Recent attempts data matching the screenshot
-  const recentAttempts = [];
+  const [recentAttempts, setRecentAttempts] = useState([]);
 
   // Achievements data matching the screenshot
   const achievements = [];
+
+  useEffect(() => {
+    if (!authUser?.user_id) return;
+    const loadDashboardHistory = async () => {
+      try {
+        const response = await authFetch(`/api/v1/transcripts?user_id=${authUser.user_id}`);
+        if (!response.ok) throw new Error("Unable to load dashboard history");
+        const transcripts = await response.json();
+        const scores = transcripts.map((item) => item.evaluation?.overall_score).filter((score) => Number.isFinite(score));
+        const seconds = transcripts.reduce((total, item) => total + (item.duration_seconds || 0), 0);
+        const nextDashboardData = {
+          averageScore: scores.length ? (scores.reduce((total, score) => total + score, 0) / scores.length).toFixed(1) : null,
+          bestScore: scores.length ? Math.max(...scores) : null,
+          challengesCompleted: transcripts.length || null,
+          totalSpeakingTime: seconds ? `${Math.floor(seconds / 60)}m` : null,
+        };
+        setDashboardData((current) =>
+          JSON.stringify(current) === JSON.stringify(nextDashboardData)
+            ? current
+            : nextDashboardData,
+        );
+        const nextRecentAttempts = transcripts.slice(0, 5).map((item) => ({
+          id: item.id,
+          title: item.topic || "Speaking practice",
+          date: new Date(item.created_at).toLocaleDateString(),
+          score: Math.round(item.evaluation?.overall_score || 0),
+          status: (item.evaluation?.overall_score || 0) >= 80 ? "green" : (item.evaluation?.overall_score || 0) >= 60 ? "yellow" : "red",
+        }));
+        setRecentAttempts((current) =>
+          JSON.stringify(current) === JSON.stringify(nextRecentAttempts)
+            ? current
+            : nextRecentAttempts,
+        );
+        const keys = ["fluency", "grammar", "vocabulary", "pronunciation", "speaking_speed", "topic_relevance"];
+        const nextRadarSkills = keys.map((key, index) => ({
+          name: key.replace("_", " "),
+          angle: -90 + index * 60,
+          user: scores.length ? Math.round(transcripts.reduce((total, item) => total + (item.evaluation?.skill_scores?.[key] || 0), 0) / transcripts.length) : 0,
+          avg: 75,
+        }));
+        setRadarSkills((current) =>
+          JSON.stringify(current) === JSON.stringify(nextRadarSkills)
+            ? current
+            : nextRadarSkills,
+        );
+      } catch (error) {
+        console.warn("Unable to load dashboard history", error);
+      }
+    };
+
+    loadDashboardHistory();
+    const refreshTimer = window.setInterval(loadDashboardHistory, 5000);
+    return () => window.clearInterval(refreshTimer);
+  }, [authUser?.user_id]);
 
   // Practice Simulation Timer
   useEffect(() => {

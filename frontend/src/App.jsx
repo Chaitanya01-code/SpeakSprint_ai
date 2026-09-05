@@ -15,7 +15,13 @@ function App() {
   if (path === "/login") return <Login />;
   if (path === "/signup") return <SignUp />;
   if (path === "/practice") return <SpinWheel />;
-  if (path === "/userselection") return <UserSelection />;
+  if (path === "/userselection") {
+    if (!authUser?.access_token) {
+      window.location.replace("/login");
+      return null;
+    }
+    return <UserSelection />;
+  }
   if (path === "/admin") {
     if (!authUser) {
       window.location.replace("/login");

@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import "./history.css";
+import { authFetch } from "../../lib/api";
 
 const initialAttemptsData = [
   {
@@ -328,7 +329,7 @@ const initialAttemptsData = [
   },
 ];
 
-const History = ({ onStartChallenge, onNavigateBack }) => {
+const History = ({ authUser, onStartChallenge, onNavigateBack }) => {
   // State
   const [attempts, setAttempts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -346,40 +347,74 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
 
   // Selected attempt for full analysis modal
   const [selectedAttempt, setSelectedAttempt] = useState(null);
+  const lastServerSnapshot = useRef("");
 
   useEffect(() => {
     const userId = authUser?.user_id;
     if (!userId) return;
 
-    fetch(`http://localhost:8000/api/v1/transcripts?user_id=${userId}`)
-      .then((response) => {
+    const loadHistory = async () => {
+      try {
+        const response = await authFetch(`/api/v1/transcripts?user_id=${userId}`);
         if (!response.ok) throw new Error("Unable to load speaking history");
-        return response.json();
-      })
-      .then((transcripts) => setAttempts(transcripts.map((item) => ({
-        id: item.id,
-        title: item.topic || "Untitled speaking session",
-        category: "Speaking practice",
-        date: new Date(item.created_at).toLocaleDateString(),
-        time: new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        duration: `${item.duration_seconds}s`,
-        score: item.score ?? 0,
-        status: "green",
-        wpm: 0,
-        clarity: "-",
-        grammar: "-",
-        pronunciation: "-",
-        confidence: "-",
-        topicRelevance: "-",
-        isBookmarked: false,
-        audioLength: `${item.duration_seconds}s`,
-        feedback: "Transcript saved. Speech analysis is not available yet.",
-        strengths: [],
-        improvements: [],
-        transcript: [{ text: item.transcript, isFiller: false }],
-        radarSkills: [],
-      }))))
-      .catch((error) => console.warn(error));
+        const transcripts = await response.json();
+        const serverSnapshot = JSON.stringify(transcripts);
+        if (serverSnapshot === lastServerSnapshot.current) return;
+        lastServerSnapshot.current = serverSnapshot;
+        const nextAttempts = transcripts.map((item) => {
+        const evaluation = item.evaluation || {};
+        const skills = evaluation.skill_scores || {};
+        const analysis = item.analysis || {};
+        const score = Math.round(evaluation.overall_score ?? 0);
+        const fillerWords = new Set(["um", "uh", "like", "actually", "basically", "so"]);
+        const transcript = item.transcript.split(/(\s+)/).map((text) => ({
+          text,
+          isFiller: fillerWords.has(text.trim().toLowerCase()),
+        }));
+        return {
+          id: item.id,
+          title: item.topic || "Untitled speaking session",
+          category: "Speaking practice",
+          date: new Date(item.created_at).toLocaleDateString(),
+          time: new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          duration: `${item.duration_seconds}s`,
+          score,
+          status: score >= 80 ? "green" : score >= 60 ? "yellow" : "red",
+          wpm: analysis.words_per_minute || 0,
+          clarity: `${Math.round(skills.fluency ?? 0)}%`,
+          grammar: `${Math.round(skills.grammar ?? 0)}%`,
+          pronunciation: `${Math.round(skills.pronunciation ?? 0)}%`,
+          confidence: `${score}%`,
+          topicRelevance: `${Math.round(skills.topic_relevance ?? 0)}%`,
+          isBookmarked: false,
+          audioLength: `${item.duration_seconds}s`,
+          feedback: evaluation.feedback || "Analysis is being prepared for this session.",
+          strengths: evaluation.strengths || [],
+          improvements: evaluation.suggestions || evaluation.weaknesses || [],
+          transcript,
+          radarSkills: [
+            { name: "Fluency", score: skills.fluency ?? 0 },
+            { name: "Grammar", score: skills.grammar ?? 0 },
+            { name: "Vocabulary", score: skills.vocabulary ?? 0 },
+            { name: "Pronunciation", score: skills.pronunciation ?? 0 },
+            { name: "Speaking speed", score: skills.speaking_speed ?? 0 },
+            { name: "Topic relevance", score: skills.topic_relevance ?? 0 },
+          ],
+        };
+        });
+        setAttempts((currentAttempts) =>
+          JSON.stringify(currentAttempts) === JSON.stringify(nextAttempts)
+            ? currentAttempts
+            : nextAttempts,
+        );
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+
+    loadHistory();
+    const refreshTimer = window.setInterval(loadHistory, 5000);
+    return () => window.clearInterval(refreshTimer);
   }, [authUser?.user_id]);
 
   // Toggle Bookmark
@@ -493,7 +528,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
         <div className="ss-history-title-group">
           <h1 className="ss-history-title">
             Speaking History
-            <span className="ss-history-title-badge">{attempts.length || "null"} Sessions Total</span>
+            <span className="ss-history-title-badge">{attempts.length} Sessions Total</span>
           </h1>
           <p className="ss-history-sub">
             Review your past 60-second speech attempts, AI coaching feedback, and metric trends.
@@ -547,9 +582,9 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">{attempts.length || "null"}</div>
+          <div className="ss-hmetric-value">{attempts.length}</div>
           <div className="ss-hmetric-footer positive">
-            <span>{attempts.length ? "↑ 4 completed this week" : "null"}</span>
+            <span>{attempts.length ? "↑ 4 completed this week" : "No attempts yet"}</span>
           </div>
         </div>
 
@@ -564,7 +599,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">{averageScore}</div>
+          <div className="ss-hmetric-value">{averageScore ?? "--"}</div>
           <div className="ss-hmetric-footer positive">
             <span>↑ 5.4 point improvement</span>
           </div>
@@ -580,7 +615,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">{bestScore}</div>
+          <div className="ss-hmetric-value">{bestScore ?? "--"}</div>
           <div className="ss-hmetric-footer">
             <span>Topic: Online Education</span>
           </div>
@@ -597,7 +632,7 @@ const History = ({ onStartChallenge, onNavigateBack }) => {
               </svg>
             </div>
           </div>
-          <div className="ss-hmetric-value">{attempts.length ? "28h 15m" : "null"}</div>
+          <div className="ss-hmetric-value">{attempts.length ? "28h 15m" : "--"}</div>
           <div className="ss-hmetric-footer">
             <span>Keep up the daily momentum!</span>
           </div>

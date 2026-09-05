@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { jsPDF } from "jspdf";
 import "./admin.css";
+import { API_BASE_URL, authFetch } from "../../lib/api";
 
 const navigation = [
   { id: "dashboard", label: "Dashboard", icon: "grid" },
@@ -244,11 +246,12 @@ function DashboardHome({ onNavigate }) {
   useEffect(() => {
     const loadUserCount = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/v1/users");
+        const response = await authFetch("/api/v1/users");
         if (!response.ok) return;
         const users = await response.json();
         setTotalUsers(users.length);
-        setDashboardUsers(users.filter((user) => !user.is_admin));
+        const nextUsers = users.filter((user) => !user.is_admin);
+        setDashboardUsers((current) => JSON.stringify(current) === JSON.stringify(nextUsers) ? current : nextUsers);
       } catch (error) {
         console.warn("Unable to load total user count", error);
       }
@@ -256,16 +259,67 @@ function DashboardHome({ onNavigate }) {
 
     const loadDashboardData = async () => {
       const [attemptResponse, topicResponse] = await Promise.all([
-        fetch("http://localhost:8000/api/v1/attempts"),
-        fetch("http://localhost:8000/api/v1/topics"),
+        authFetch("/api/v1/attempts"),
+        authFetch("/api/v1/topics"),
       ]);
-      if (attemptResponse.ok) setDashboardAttempts(await attemptResponse.json());
-      if (topicResponse.ok) setDashboardTopics(await topicResponse.json());
+      if (attemptResponse.ok) {
+        const nextAttempts = await attemptResponse.json();
+        setDashboardAttempts((current) => JSON.stringify(current) === JSON.stringify(nextAttempts) ? current : nextAttempts);
+      }
+      if (topicResponse.ok) {
+        const nextTopics = await topicResponse.json();
+        setDashboardTopics((current) => JSON.stringify(current) === JSON.stringify(nextTopics) ? current : nextTopics);
+      }
     };
 
     loadUserCount();
     loadDashboardData().catch((error) => console.warn("Unable to load dashboard data", error));
+    const refreshTimer = window.setInterval(() => {
+      loadUserCount();
+      loadDashboardData().catch((error) => console.warn("Unable to refresh dashboard data", error));
+    }, 5000);
+    return () => window.clearInterval(refreshTimer);
   }, []);
+
+  const exportReport = () => {
+    const pdf = new jsPDF();
+    const reportDate = new Date().toLocaleString();
+    let y = 20;
+
+    pdf.setFontSize(20);
+    pdf.text("SpeakSprint AI Admin Report", 20, y);
+    y += 8;
+    pdf.setFontSize(10);
+    pdf.setTextColor(100);
+    pdf.text(`Generated: ${reportDate}`, 20, y);
+    y += 14;
+    pdf.setTextColor(30);
+    pdf.setFontSize(13);
+    pdf.text("Dashboard Metrics", 20, y);
+    y += 9;
+    pdf.setFontSize(11);
+    liveMetrics.forEach((metric) => {
+      pdf.text(`${metric.label}: ${metric.value}${metric.suffix || ""}`, 25, y);
+      y += 7;
+    });
+    y += 7;
+    pdf.setFontSize(13);
+    pdf.text("Recent Attempts", 20, y);
+    y += 9;
+    pdf.setFontSize(10);
+    dashboardAttempts.slice(0, 10).forEach((attempt) => {
+      const line = `${attempt.learner} | ${attempt.challenge} | ${attempt.score === null ? "-" : `${attempt.score}/100`} | ${attempt.duration} | ${new Date(attempt.date).toLocaleDateString()}`;
+      const wrapped = pdf.splitTextToSize(line, 165);
+      pdf.text(wrapped, 25, y);
+      y += wrapped.length * 5 + 2;
+      if (y > 275) {
+        pdf.addPage();
+        y = 20;
+      }
+    });
+    pdf.save("speaksprint-admin-report.pdf");
+    window.alert("Report downloaded successfully.");
+  };
 
   return (
     <>
@@ -281,7 +335,7 @@ function DashboardHome({ onNavigate }) {
             <Icon name="calendar" size={15} /> May 10 - May 16, 2024{" "}
             <span>⌄</span>
           </button>
-          <button className="admin-export-button">
+          <button className="admin-export-button" type="button" onClick={exportReport}>
             <Icon name="download" size={15} /> Export Report
           </button>
         </div>
@@ -515,6 +569,7 @@ function ManagementPage({ page }) {
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
   const [attemptRows, setAttemptRows] = useState([]);
+  const [analysisRows, setAnalysisRows] = useState([]);
   const [leaderboardRows, setLeaderboardRows] = useState([]);
   const [attemptsLoading, setAttemptsLoading] = useState(false);
   const [attemptsError, setAttemptsError] = useState("");
@@ -545,7 +600,7 @@ function ManagementPage({ page }) {
     const loadTimer = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/v1/settings/session-duration",
+          `${API_BASE_URL}/api/v1/settings/session-duration`,
         );
         if (!response.ok) throw new Error("Unable to load timer setting");
         const data = await response.json();
@@ -561,17 +616,30 @@ function ManagementPage({ page }) {
   }, [page]);
 
   useEffect(() => {
-    if (page !== "challenges" && page !== "users" && page !== "attempts" && page !== "leaderboard") return;
+    if (page !== "challenges" && page !== "users" && page !== "attempts" && page !== "leaderboard" && page !== "speech-analysis" && page !== "ai-feedback") return;
 
-    if (page === "attempts" || page === "leaderboard") {
+    if (page === "attempts" || page === "leaderboard" || page === "speech-analysis" || page === "ai-feedback") {
       const loadAttempts = async () => {
-        setAttemptsLoading(true);
         setAttemptsError("");
         try {
-          const response = await fetch("http://localhost:8000/api/v1/attempts");
-          if (!response.ok) throw new Error("Unable to load attempts");
+          const response = await authFetch(page === "attempts" || page === "leaderboard" ? "/api/v1/attempts" : "/api/v1/transcripts/admin");
+          if (!response.ok) throw new Error("Unable to load analysis data");
           const attempts = await response.json();
-          setAttemptRows(attempts.map((attempt) => ({
+          if (page === "speech-analysis" || page === "ai-feedback") {
+            const nextRows = attempts.map((item) => {
+              const skills = item.evaluation?.skill_scores || {};
+              const analysis = item.analysis || {};
+              return {
+                id: item.id,
+                values: page === "speech-analysis"
+                  ? [item.learner || `User #${item.user_id}`, `${Math.round(skills.fluency || 0)}%`, `${Math.round(skills.grammar || 0)}%`, `${analysis.words_per_minute || 0} WPM`, `${Math.round(skills.topic_relevance || 0)}%`]
+                  : [item.learner || `User #${item.user_id}`, item.topic || "General practice", item.evaluation?.feedback || "No feedback", `${Math.round(item.evaluation?.overall_score || 0)}/100`, "Complete"],
+              };
+            });
+            setAnalysisRows((current) => JSON.stringify(current) === JSON.stringify(nextRows) ? current : nextRows);
+            return;
+          }
+          const nextAttemptRows = attempts.map((attempt) => ({
             id: attempt.id,
             values: [
               attempt.learner,
@@ -580,7 +648,8 @@ function ManagementPage({ page }) {
               attempt.duration,
               new Date(attempt.date).toLocaleDateString(),
             ],
-          })));
+          }));
+          setAttemptRows((current) => JSON.stringify(current) === JSON.stringify(nextAttemptRows) ? current : nextAttemptRows);
           if (page === "leaderboard") {
             const grouped = new Map();
             attempts.forEach((attempt) => {
@@ -589,10 +658,11 @@ function ManagementPage({ page }) {
               if (attempt.score !== null) current.best = Math.max(current.best ?? attempt.score, attempt.score);
               grouped.set(attempt.learner, current);
             });
-            setLeaderboardRows(Array.from(grouped.entries()).sort((left, right) => (right[1].best ?? -1) - (left[1].best ?? -1)).map(([learner, data], index) => ({
+            const nextLeaderboardRows = Array.from(grouped.entries()).sort((left, right) => (right[1].best ?? -1) - (left[1].best ?? -1)).map(([learner, data], index) => ({
               id: learner,
               values: [String(index + 1), learner, data.best === null ? "-" : `${data.best}/100`, `${data.count} attempts`, "-"],
-            })));
+            }));
+            setLeaderboardRows((current) => JSON.stringify(current) === JSON.stringify(nextLeaderboardRows) ? current : nextLeaderboardRows);
           }
         } catch (error) {
           setAttemptsError(error.message);
@@ -602,19 +672,18 @@ function ManagementPage({ page }) {
         }
       };
       loadAttempts();
-      return;
+      const refreshTimer = window.setInterval(loadAttempts, 5000);
+      return () => window.clearInterval(refreshTimer);
     }
 
     if (page === "users") {
       const loadUsers = async () => {
-        setUsersLoading(true);
         setUsersError("");
         try {
-          const response = await fetch("http://localhost:8000/api/v1/users");
+          const response = await authFetch("/api/v1/users");
           if (!response.ok) throw new Error("Unable to load users");
           const users = await response.json();
-          setUserRows(
-            users.map((user) => ({
+          const nextUserRows = users.map((user) => ({
               id: user.id,
               isAdmin: user.is_admin,
               values: [
@@ -628,8 +697,8 @@ function ManagementPage({ page }) {
                     ? "Active"
                     : "Logged out",
               ],
-            })),
-          );
+          }));
+          setUserRows((current) => JSON.stringify(current) === JSON.stringify(nextUserRows) ? current : nextUserRows);
         } catch (error) {
           setUsersError(error.message);
           setUserRows([]);
@@ -643,16 +712,14 @@ function ManagementPage({ page }) {
     }
 
     const loadTopics = async () => {
-      setTopicsLoading(true);
       setTopicsError("");
 
       try {
-        const response = await fetch("http://localhost:8000/api/v1/topics");
+          const response = await authFetch("/api/v1/topics");
         if (!response.ok) throw new Error("Unable to load topics");
 
         const topics = await response.json();
-        setChallengeRows(
-          topics.map((topic) => ({
+        const nextChallengeRows = topics.map((topic) => ({
             id: topic.id,
             values: [
               topic.topic_name,
@@ -661,8 +728,8 @@ function ManagementPage({ page }) {
               "-",
               "Published",
             ],
-          })),
-        );
+        }));
+        setChallengeRows((current) => JSON.stringify(current) === JSON.stringify(nextChallengeRows) ? current : nextChallengeRows);
       } catch (error) {
         setTopicsError(error.message);
         setChallengeRows([]);
@@ -672,6 +739,8 @@ function ManagementPage({ page }) {
     };
 
     loadTopics();
+    const refreshTimer = window.setInterval(loadTopics, 5000);
+    return () => window.clearInterval(refreshTimer);
   }, [page]);
 
   const closeCreateDialog = () => {
@@ -687,7 +756,7 @@ function ManagementPage({ page }) {
     setCreateError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/topics", {
+      const response = await authFetch("/api/v1/topics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -729,7 +798,7 @@ function ManagementPage({ page }) {
     setTopicsError("");
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/topics/${topicId}`,
+        `${API_BASE_URL}/api/v1/topics/${topicId}`,
         {
           method: "DELETE",
         },
@@ -764,7 +833,7 @@ function ManagementPage({ page }) {
     setIsUserCreating(true);
     setUserCreateError("");
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users", {
+      const response = await authFetch("/api/v1/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -806,7 +875,7 @@ function ManagementPage({ page }) {
     setUsersError("");
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/users/${userId}`,
+        `${API_BASE_URL}/api/v1/users/${userId}`,
         { method: "DELETE" },
       );
       if (!response.ok) {
@@ -833,7 +902,7 @@ function ManagementPage({ page }) {
     setTimerError("");
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/settings/session-duration",
+        `${API_BASE_URL}/api/v1/settings/session-duration`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -905,7 +974,7 @@ function ManagementPage({ page }) {
       title: "Speech Analysis",
       subtitle: "Monitor fluency, clarity, pace, and pronunciation signals.",
       action: "View Reports",
-      columns: ["Metric", "Average", "Change", "Samples", "Health"],
+      columns: ["Learner", "Fluency", "Grammar", "Speaking Pace", "Topic Relevance"],
       rows: [
         ["Fluency", "86%", "+4.2%", "45,231", "Strong"],
         ["Pronunciation", "82%", "+2.8%", "45,231", "Strong"],
@@ -916,7 +985,7 @@ function ManagementPage({ page }) {
       title: "AI Feedback",
       subtitle: "Review automated coaching quality and model activity.",
       action: "Model Settings",
-      columns: ["Model", "Requests", "Accuracy", "Latency", "Status"],
+      columns: ["Learner", "Topic", "Feedback", "Score", "Status"],
       rows: [
         ["Speech Coach v2", "28,936", "94.2%", "420 ms", "Operational"],
         ["Grammar Coach", "16,482", "96.1%", "280 ms", "Operational"],
@@ -1029,6 +1098,8 @@ function ManagementPage({ page }) {
           ? attemptRows
           : page === "leaderboard"
             ? leaderboardRows
+              : page === "speech-analysis" || page === "ai-feedback"
+                ? analysisRows
         : [];
   const loading =
     page === "challenges"
@@ -1039,6 +1110,8 @@ function ManagementPage({ page }) {
           ? attemptsLoading
           : page === "leaderboard"
             ? attemptsLoading
+            : page === "speech-analysis" || page === "ai-feedback"
+              ? attemptsLoading
         : false;
   const loadError =
     page === "challenges"
@@ -1049,6 +1122,8 @@ function ManagementPage({ page }) {
           ? attemptsError
           : page === "leaderboard"
             ? attemptsError
+            : page === "speech-analysis" || page === "ai-feedback"
+              ? attemptsError
           : "";
   return (
     <div className="admin-management-page">
@@ -1114,17 +1189,10 @@ function ManagementPage({ page }) {
             {!loading &&
               !loadError &&
               rows.map((entry) => {
-                const values =
-                  page === "challenges" || page === "users"
-                    ? entry.values
-                    : entry;
+                const values = entry.values;
                 return (
                   <tr
-                    key={
-                      page === "challenges" || page === "users"
-                        ? entry.id
-                        : entry[0]
-                    }
+                    key={entry.id}
                   >
                     {values.map((cell, index) => (
                       <td key={`${cell}-${index}`}>
@@ -1438,7 +1506,7 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
     if (authUser?.user_id) {
-      await fetch(`http://localhost:8000/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
+      await authFetch(`/logout?user_id=${authUser.user_id}`, { method: "POST" }).catch(() => {});
     }
     localStorage.removeItem("authUser");
     window.location.href = "/login";

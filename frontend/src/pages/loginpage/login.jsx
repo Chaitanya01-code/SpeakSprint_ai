@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./style.css";
+import { API_BASE_URL } from "../../lib/api";
 
 const Login = () => {
   const [loginIdentifier, setLoginIdentifier] = useState("");
@@ -22,7 +23,7 @@ const Login = () => {
 
     try {
       // API call to backend
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

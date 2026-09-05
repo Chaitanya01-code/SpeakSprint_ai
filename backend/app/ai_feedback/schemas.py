@@ -1,5 +1,7 @@
 """Pydantic schemas for the AI scoring and feedback pipeline."""
 
+from typing import List
+
 from pydantic import BaseModel, Field
 
 
@@ -32,8 +34,8 @@ class FinalEvaluation(BaseModel):
 
     overall_score: float = Field(ge=0, le=100)
     skill_scores: SkillScores
-    strengths: list[str]
-    weaknesses: list[str]
-    observations: list[str]
-    suggestions: list[str]
+    strengths: List[str]
+    weaknesses: List[str]
+    observations: List[str]
+    suggestions: List[str]
     feedback: str

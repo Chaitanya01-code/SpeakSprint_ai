@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, String, select
 
-from .database import Base, SessionLocal, create_all_tables
+from .database import Base, SessionLocal
 
 
 class AppSetting(Base):
@@ -40,8 +40,6 @@ def initialize_default_settings():
             db.commit()
     finally:
         db.close()
-
-
 def get_session_duration_seconds() -> int:
     """Return the current speaking timer length in seconds."""
     db = SessionLocal()
@@ -52,6 +50,16 @@ def get_session_duration_seconds() -> int:
         return int(setting.value)
     finally:
         db.close()
+
+
+__all__ = [
+    "AppSetting",
+    "DEFAULT_SESSION_DURATION_SECONDS",
+    "SESSION_DURATION_KEY",
+    "get_session_duration_seconds",
+    "initialize_default_settings",
+    "set_session_duration_seconds",
+]
 
 
 def set_session_duration_seconds(duration_seconds: int) -> int:
@@ -77,5 +85,3 @@ def set_session_duration_seconds(duration_seconds: int) -> int:
         db.close()
 
 
-create_all_tables()
-initialize_default_settings()

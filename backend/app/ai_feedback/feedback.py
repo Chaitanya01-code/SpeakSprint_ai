@@ -1,10 +1,10 @@
-"""AI feedback generation logic."""
+"""Gemini feedback generation helpers."""
 
+import json
 import os
+from urllib import request
 
 from dotenv import load_dotenv
-from openai import OpenAI
-
 from .prompts import FEEDBACK_SYSTEM_PROMPT, FEEDBACK_USER_PROMPT
 from .schemas import FinalEvaluation
 
@@ -33,30 +33,19 @@ def get_system_prompt() -> str:
 
 
 def generate_ai_feedback(evaluation: FinalEvaluation) -> str:
-    """Generate AI feedback using the OpenAI API."""
-
-    # Read the API key from backend/.env
+    """Generate concise feedback text with Gemini."""
     load_dotenv()
-
-    api_key = os.getenv("OPENAI_API_KEY")
-
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "OPENAI_API_KEY is not set in the .env file."
-        )
+        raise RuntimeError("GEMINI_API_KEY is not set in the .env file.")
 
-    # Create OpenAI client
-    client = OpenAI(api_key=api_key)
-
-    # Build the prompt using your existing function
-    user_prompt = build_feedback_prompt(evaluation)
-
-    # Send the prompt to OpenAI
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        instructions=get_system_prompt(),
-        input=user_prompt,
-    )
-
-    # Return the AI's text response
-    return response.output_text
+    body = json.dumps({
+        "contents": [{"parts": [{"text": build_feedback_prompt(evaluation)}]}],
+        "systemInstruction": {"parts": [{"text": get_system_prompt()}]},
+        "generationConfig": {"temperature": 0.2},
+    }).encode("utf-8")
+    endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + api_key
+    req = request.Request(endpoint, data=body, headers={"Content-Type": "application/json"}, method="POST")
+    with request.urlopen(req, timeout=30) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+    return payload["candidates"][0]["content"]["parts"][0]["text"]

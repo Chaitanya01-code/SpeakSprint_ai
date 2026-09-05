@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import User, get_db
+from app.core.security import create_access_token, get_current_user
 
 router = APIRouter()
 
@@ -101,6 +102,8 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {
+        "access_token": create_access_token(user),
+        "token_type": "bearer",
         "message": "Admin signed in successfully" if user.is_admin else "Signed in successfully",
         "user_id": user.id,
         "is_admin": user.is_admin,
@@ -112,10 +115,8 @@ async def login(credentials: AuthRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/logout")
-async def logout(user_id: int, db: Session = Depends(get_db)):
-    user = db.scalar(select(User).where(User.id == user_id))
-    if user:
-        user.presence_status = "logged_out"
-        db.commit()
+async def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    current_user.presence_status = "logged_out"
+    db.commit()
     return {"message": "Logged out"}
 

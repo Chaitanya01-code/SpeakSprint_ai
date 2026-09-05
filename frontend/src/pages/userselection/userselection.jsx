@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./userselection.css";
+import { authFetch } from "../../lib/api";
 
 const UserSelection = () => {
 	const [selectedName, setSelectedName] = useState("");
@@ -10,7 +11,7 @@ const UserSelection = () => {
 	useEffect(() => {
 		const loadUsers = async () => {
 			try {
-				const response = await fetch("http://localhost:8000/api/v1/users");
+				const response = await authFetch("/api/v1/users");
 				if (!response.ok) throw new Error("Unable to load users");
 				const data = await response.json();
 				setUsers(data.filter((user) => user.is_active && !user.is_admin));

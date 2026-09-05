@@ -50,7 +50,7 @@ The module is designed to generate:
 
 The scoring and schema components have been implemented and basic independent checks have been completed.
 
-OpenAI integration and full backend integration will be added after the input/output contract with the other analysis modules is finalized.
+Gemini integration is implemented through the Generative Language HTTPS API using `GEMINI_API_KEY`. The transcript workflow stores the structured evaluation on the same user-owned transcript record. If Gemini is unavailable, the local scoring pipeline supplies fallback feedback.
 
 ## Important Integration Note
 

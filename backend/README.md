@@ -6,10 +6,12 @@ FastAPI-based backend server for the SpeakSprint AI application. Handles user au
 
 - **User Authentication**: Register, login with email/password, admin login
 - **Topic Management**: CRUD operations for topics
-- **Text Processing**: Store and manage text content
+- **Speech Evaluation**: Store transcripts, local metrics, and Gemini/fallback feedback per user
+- **Admin Reporting**: Attempts, speech analysis, AI feedback, and leaderboard data
 - **Database**: SQLAlchemy ORM with SQLite/PostgreSQL support
 - **API Documentation**: Auto-generated Swagger UI
 - **Security**: bcrypt password hashing, CORS middleware
+- **AI feedback**: Gemini API via `GEMINI_API_KEY` with local fallback scoring
 
 ## 🛠️ Tech Stack
 
@@ -60,7 +62,7 @@ FastAPI-based backend server for the SpeakSprint AI application. Handles user au
    uvicorn app.main:app --reload
    ```
 
-The API will be available at `http://localhost:8000`
+The API will be available at `http://localhost:8001` for local development. Docker uses port `8000`.
 
 ## 📚 API Documentation
 
@@ -73,6 +75,12 @@ The API will be available at `http://localhost:8000`
 #### Authentication
 - `POST /register` - Register new user
 - `POST /login` - Login user/admin
+
+#### Speech analysis
+- `POST /api/v1/transcripts` - Save a transcript and generate its evaluation
+- `GET /api/v1/transcripts?user_id={id}` - Get one user's transcripts and reports
+- `GET /api/v1/transcripts/admin` - Admin-only reports for all users
+- `GET /api/v1/attempts/leaderboard` - Authenticated shared leaderboard
 
 #### Topics
 - `GET /api/v1/topics` - List all topics
@@ -88,26 +96,24 @@ Send audio chunks as binary WebSocket messages. The server returns JSON messages
 with `type`, `transcript`, and `is_final`. Send `stop` or `{"type":"stop"}`
 as a text message to finish the stream.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 app/
-├── main.py              # FastAPI application entry point
-├── __init__.py
-├── api/
-│   ├── auth.py         # Authentication routes
-│   └── __init__.py
-├── models/
-│   ├── topic.py        # Topic API routes & schemas
-│   ├── admin.py        # Admin routes (placeholder)
-│   ├── user.py         # User routes (placeholder)
-│   └── __init__.py
-└── core/
-    ├── database.py     # Database configuration
-    ├── userdb.py       # User model
-    ├── topicdb.py      # Topic model
-    ├── textdb.py       # Text model
-    └── __init__.py
+├── main.py                  # FastAPI application and lifespan
+├── api/                     # HTTP and WebSocket route handlers
+├── core/                    # Database configuration and persistence services
+├── models/                  # Current route modules and response schemas
+├── ai_analysis/             # Speech analysis algorithms
+├── ai_feedback/             # Scoring and AI feedback pipeline
+└── voice/                   # Live speech-to-text integration
+```
+
+The application is started from this directory so `app` is importable:
+
+```bash
+cd backend
+uvicorn app.main:app --reload
 ```
 
 ## 🗄️ Database
@@ -136,6 +142,12 @@ app/
 - `content` (TEXT)
 - `created_at` (DATETIME, DEFAULT: UTC now)
 
+**speech_transcripts**
+- `user_id`, `transcript`, `duration_seconds`, and `topic`
+- `analysis_json` for local metrics
+- `evaluation_json` for Gemini or fallback evaluation
+- `created_at`
+
 ### Default Admin User
 Automatically created on first run:
 - **Username**: admin123
@@ -150,6 +162,15 @@ DB_URL=sqlite:///./speaksprint.db
 
 # Optional: Deepgram API key for speech-to-text
 DEEPGRAM_API_KEY=your_api_key_here
+
+# Optional: Gemini API key for structured AI feedback
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Required for production JWT signing (use a long random value)
+JWT_SECRET_KEY=replace-with-a-long-random-secret
+
+# Optional token lifetime in minutes
+JWT_EXPIRE_MINUTES=60
 ```
 
 ## 🚀 Running the Application
@@ -161,7 +182,7 @@ uvicorn app.main:app --reload
 
 ### Production Mode
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
 
 ### Docker (if dockerfile exists)

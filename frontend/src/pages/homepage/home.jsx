@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { authFetch } from '../../lib/api';
 import './home.css';
 
 export default function Home() {
@@ -10,10 +11,14 @@ export default function Home() {
   const goToLogin = () => { window.location.href = '/login'; };
   const goToSignup = () => { window.location.href = '/signup'; };
   const startSpeaking = () => {
+    if (!JSON.parse(localStorage.getItem('authUser') || 'null')?.access_token) {
+      window.location.href = '/login';
+      return;
+    }
     setIsUserSelectionOpen(true);
     if (users.length || usersLoading) return;
     setUsersLoading(true);
-    fetch('http://localhost:8000/api/v1/users')
+    authFetch('/api/v1/users')
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load users');
         return response.json();

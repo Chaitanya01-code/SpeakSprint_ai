@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./leaderboard.css";
+import { authFetch } from "../../lib/api";
 
   const Leaderboard = ({ authUser }) => {
   // Timeframe selector state
@@ -283,7 +284,7 @@ import "./leaderboard.css";
   const [currentRankings, setCurrentRankings] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/attempts")
+    const loadLeaderboard = () => authFetch("/api/v1/attempts/leaderboard")
       .then((response) => response.json())
       .then((attempts) => {
         const grouped = new Map();
@@ -293,7 +294,7 @@ import "./leaderboard.css";
           current.scores.push(attempt.score);
           grouped.set(attempt.learner, current);
         });
-        setCurrentRankings(Array.from(grouped.entries()).map(([name, value]) => ({
+        const nextRankings = Array.from(grouped.entries()).map(([name, value]) => ({
           name,
           score: Math.round(value.scores.reduce((sum, score) => sum + score, 0) / value.scores.length),
           streak: 0,
@@ -304,9 +305,14 @@ import "./leaderboard.css";
           gender: "male",
           wpm: 0,
           clarity: "-",
-        })).sort((left, right) => right.score - left.score).map((item, index) => ({ ...item, rank: index + 1 })));
+        })).sort((left, right) => right.score - left.score).map((item, index) => ({ ...item, rank: index + 1 }));
+        setCurrentRankings((current) => JSON.stringify(current) === JSON.stringify(nextRankings) ? current : nextRankings);
       })
       .catch((error) => console.warn("Unable to load leaderboard", error));
+
+      loadLeaderboard();
+      const refreshTimer = window.setInterval(loadLeaderboard, 5000);
+      return () => window.clearInterval(refreshTimer);
   }, [authUser?.username]);
   const displayedRankings = isExpanded ? currentRankings : currentRankings.slice(0, 5);
 
