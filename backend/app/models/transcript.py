@@ -8,6 +8,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, select
 from sqlalchemy.orm import Session
 
 from ..core.database import Base, SessionLocal, get_db
+from ..core.speechdb import TextModel
 
 
 class SpeechTranscript(Base):
@@ -76,6 +77,12 @@ async def create_transcript(payload: TranscriptCreate, db: Session = Depends(get
         raise HTTPException(status_code=400, detail="Transcript cannot be empty")
 
     db.add(transcript)
+    db.add(
+        TextModel(
+            title=transcript.topic or "Speaking transcript",
+            content=transcript.transcript,
+        )
+    )
     from .attempt import Attempt
     db.add(Attempt(user_id=user.id, duration_seconds=max(payload.duration_seconds, 1)))
     db.commit()

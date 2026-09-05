@@ -15,6 +15,12 @@ python-dotenv==1.0.0
 # Speech-to-Text
 deepgram-sdk==3.2.0
 
+# NLP analysis
+spacy==3.7.5
+textblob==0.18.0.post0
+language-tool-python==2.8.1
+scikit-learn==1.5.1
+
 # Development (optional)
 # pytest==7.4.3
 # pytest-asyncio==0.21.1
