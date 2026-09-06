@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import os
 from typing import Any, Dict, List, Optional
 
 import spacy
@@ -53,7 +54,10 @@ def _get_grammar_tool():
     """Create LanguageTool once and reuse it for later requests."""
     global _grammar_tool
     if _grammar_tool is None:
-        _grammar_tool = language_tool_python.LanguageTool(LANGUAGE)
+        if os.getenv("LANGUAGETOOL_MODE", "local").lower() == "public":
+            _grammar_tool = language_tool_python.LanguageToolPublicAPI(LANGUAGE)
+        else:
+            _grammar_tool = language_tool_python.LanguageTool(LANGUAGE)
     return _grammar_tool
 
 

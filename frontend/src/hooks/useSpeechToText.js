@@ -37,13 +37,22 @@ export default function useSpeechToText() {
   const finalTranscriptRef = useRef("");
   const latestTranscriptRef = useRef("");
 
-  const stop = useCallback(() => {
-    recorderRef.current?.stop();
-    recorderRef.current = null;
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ type: "stop" }));
+  const stop = useCallback(async () => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      await new Promise((resolve) => {
+        recorder.addEventListener("stop", resolve, { once: true });
+        recorder.stop();
+      });
     }
-    socketRef.current?.close();
+    recorderRef.current = null;
+
+    const socket = socketRef.current;
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "stop" }));
+      await new Promise((resolve) => window.setTimeout(resolve, 500));
+    }
+    socket?.close();
     socketRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;

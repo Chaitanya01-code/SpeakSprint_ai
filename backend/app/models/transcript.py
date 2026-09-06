@@ -125,24 +125,25 @@ async def create_transcript(
     topic_record = None
     if transcript.topic:
         topic_record = db.scalar(select(Topic).where(Topic.topic_name == transcript.topic))
-    db.commit()
-    db.refresh(transcript)
-
-    # Analyze the committed row so the report always belongs to this stored user record.
-    analysis, evaluation = analyze_transcript(
-        transcript.transcript,
-        transcript.duration_seconds,
-        transcript.topic,
-    )
-    transcript.analysis_json = json.dumps(analysis)
-    transcript.evaluation_json = json.dumps(evaluation.model_dump() if hasattr(evaluation, "model_dump") else evaluation.dict())
-    db.add(Attempt(
-        user_id=transcript.user_id,
-        topic_id=topic_record.id if topic_record else None,
-        score=evaluation.overall_score,
-        duration_seconds=max(transcript.duration_seconds, 1),
-    ))
-    db.commit()
+    try:
+        db.flush()
+        analysis, evaluation = analyze_transcript(
+            transcript.transcript,
+            transcript.duration_seconds,
+            transcript.topic,
+        )
+        transcript.analysis_json = json.dumps(analysis)
+        transcript.evaluation_json = json.dumps(evaluation.model_dump() if hasattr(evaluation, "model_dump") else evaluation.dict())
+        db.add(Attempt(
+            user_id=transcript.user_id,
+            topic_id=topic_record.id if topic_record else None,
+            score=evaluation.overall_score,
+            duration_seconds=max(transcript.duration_seconds, 1),
+        ))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(transcript)
     return _response(transcript)
 

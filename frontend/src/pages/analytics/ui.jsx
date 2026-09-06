@@ -99,15 +99,34 @@ const Analytics = ({ authUser }) => {
         const response = await authFetch(`/api/v1/transcripts?user_id=${authUser.user_id}`);
         if (!response.ok) throw new Error("Unable to load analytics");
         const transcripts = await response.json();
-        const seconds = transcripts.reduce((total, item) => total + item.duration_seconds, 0);
+        const now = new Date();
+        const start = new Date(now);
+        if (timeframe === "This Week") {
+          const day = start.getDay() || 7;
+          start.setDate(start.getDate() - day + 1);
+        } else if (timeframe === "This Month") {
+          start.setDate(1);
+        } else {
+          start.setMonth(start.getMonth() - 1, 1);
+        }
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        if (timeframe === "This Week") end.setDate(end.getDate() + 7);
+        else if (timeframe === "This Month") end.setMonth(end.getMonth() + 1);
+        else end.setMonth(end.getMonth() + 1);
+        const filteredTranscripts = transcripts.filter((item) => {
+          const createdAt = new Date(item.created_at);
+          return createdAt >= start && createdAt < end;
+        });
+        const seconds = filteredTranscripts.reduce((total, item) => total + item.duration_seconds, 0);
         const nextData = {
           metrics: {
-            avgScore: transcripts.length ? (transcripts.reduce((total, item) => total + (item.evaluation?.overall_score || 0), 0) / transcripts.length).toFixed(1) : "-",
-            challenges: transcripts.length,
+            avgScore: filteredTranscripts.length ? (filteredTranscripts.reduce((total, item) => total + (item.evaluation?.overall_score || 0), 0) / filteredTranscripts.length).toFixed(1) : "-",
+            challenges: filteredTranscripts.length,
             speakingTime: `${Math.floor(seconds / 60)}m`,
-            bestScore: transcripts.length ? Math.max(...transcripts.map((item) => item.evaluation?.overall_score || 0)) : "-",
+            bestScore: filteredTranscripts.length ? Math.max(...filteredTranscripts.map((item) => item.evaluation?.overall_score || 0)) : "-",
           },
-          trendPoints: transcripts.slice(0, 7).reverse().map((item, index) => ({
+          trendPoints: filteredTranscripts.slice(0, 7).reverse().map((item, index) => ({
             score: Math.round(item.evaluation?.overall_score || 0),
             date: new Date(item.created_at).toLocaleDateString(),
             x: 45 + index * 95,
@@ -122,8 +141,8 @@ const Analytics = ({ authUser }) => {
             { name: "Relevance", score: 0, angle: 210 },
           ].map((skill) => ({
             ...skill,
-            score: transcripts.length
-              ? Math.round(transcripts.reduce((total, item) => total + (item.evaluation?.skill_scores?.[skill.name === "Speed" ? "speaking_speed" : skill.name === "Relevance" ? "topic_relevance" : skill.name.toLowerCase()] || 0), 0) / transcripts.length)
+            score: filteredTranscripts.length
+              ? Math.round(filteredTranscripts.reduce((total, item) => total + (item.evaluation?.skill_scores?.[skill.name === "Speed" ? "speaking_speed" : skill.name === "Relevance" ? "topic_relevance" : skill.name.toLowerCase()] || 0), 0) / filteredTranscripts.length)
               : 0,
           })),
         };
@@ -138,7 +157,7 @@ const Analytics = ({ authUser }) => {
     loadAnalytics();
     const refreshTimer = window.setInterval(loadAnalytics, 5000);
     return () => window.clearInterval(refreshTimer);
-  }, [authUser?.user_id]);
+  }, [authUser?.user_id, timeframe]);
 
   // Radar chart geometry calculations
   const radarCenter = { x: 135, y: 110 };

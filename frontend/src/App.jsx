@@ -8,9 +8,22 @@ import SignUp from "./pages/loginpage/signup";
 import SpinWheel from "./pages/spinwheel/spinwheel";
 import UserSelection from "./pages/userselection/userselection";
 
+function InfoPage({ title, message }) {
+  return (
+    <main style={{ minHeight: "100vh", padding: "48px", fontFamily: "sans-serif" }}>
+      <h1>{title}</h1>
+      <p>{message}</p>
+      <a href="/login">Return to login</a>
+    </main>
+  );
+}
+
 function App() {
   const path = window.location.pathname;
   const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
+
+  if (path === "/forgot-password") return <InfoPage title="Reset your password" message="Password reset is not available yet. Please contact your administrator." />;
+  if (path === "/terms") return <InfoPage title="Terms and conditions" message="Please contact your administrator for the current terms and conditions." />;
 
   if (path === "/login") return <Login />;
   if (path === "/signup") return <SignUp />;

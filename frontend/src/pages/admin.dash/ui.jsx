@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import "./admin.css";
-import { API_BASE_URL, authFetch } from "../../lib/api";
+import { authFetch } from "../../lib/api";
 
 const navigation = [
   { id: "dashboard", label: "Dashboard", icon: "grid" },
@@ -599,9 +599,7 @@ function ManagementPage({ page }) {
 
     const loadTimer = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/settings/session-duration`,
-        );
+        const response = await authFetch("/api/v1/settings/session-duration");
         if (!response.ok) throw new Error("Unable to load timer setting");
         const data = await response.json();
         const nextSeconds = Number(data.session_duration_seconds || 60);
@@ -797,12 +795,9 @@ function ManagementPage({ page }) {
 
     setTopicsError("");
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/topics/${topicId}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await authFetch(`/api/v1/topics/${topicId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
         throw new Error(errorBody?.detail || "Unable to delete challenge");
@@ -874,10 +869,9 @@ function ManagementPage({ page }) {
     if (!window.confirm(`Delete "${userName}"?`)) return;
     setUsersError("");
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/users/${userId}`,
-        { method: "DELETE" },
-      );
+      const response = await authFetch(`/api/v1/users/${userId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
         throw new Error(errorBody?.detail || "Unable to delete user");
@@ -901,14 +895,11 @@ function ManagementPage({ page }) {
     setTimerSaving(true);
     setTimerError("");
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/settings/session-duration`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_duration_seconds: value }),
-        },
-      );
+      const response = await authFetch("/api/v1/settings/session-duration", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_duration_seconds: value }),
+      });
       if (!response.ok) {
         const errorBody = await response.json().catch(() => null);
         throw new Error(errorBody?.detail || "Unable to update timer");

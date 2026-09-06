@@ -8,6 +8,27 @@ import useSpeechToText from "../../hooks/useSpeechToText";
 import "./design.css";
 import { authFetch } from "../../lib/api";
 
+const buildWeeklyData = (transcripts, weekOffset = 0) => {
+  const today = new Date();
+  const monday = new Date(today);
+  const day = monday.getDay() || 7;
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - day + 1 - weekOffset * 7);
+  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const points = labels.map((label, index) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + index);
+    const scores = transcripts.filter((item) => {
+      const createdAt = new Date(item.created_at);
+      return createdAt >= date && createdAt < new Date(date.getTime() + 86400000);
+    }).map((item) => item.evaluation?.overall_score).filter((score) => Number.isFinite(score));
+    if (!scores.length) return null;
+    const score = Math.round(scores.reduce((total, value) => total + value, 0) / scores.length);
+    return { day: label, score, x: 55 + index * 52, y: 200 - (score / 100) * 165 };
+  });
+  return points.filter(Boolean);
+};
+
 const Dashboard = ({ authUser }) => {
   const userName = authUser?.username || null;
   const userEmail = authUser?.email || null;
@@ -61,7 +82,7 @@ const Dashboard = ({ authUser }) => {
   const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   // Weekly Progress Chart Data
-  const weeklyDataSets = { "This Week": [], "Last Week": [] };
+  const [weeklyDataSets, setWeeklyDataSets] = useState({ "This Week": [], "Last Week": [] });
 
   const currentWeeklyData = weeklyDataSets[timeframe] || weeklyDataSets["This Week"];
   const [hoveredDataPoint, setHoveredDataPoint] = useState(
@@ -132,6 +153,10 @@ const Dashboard = ({ authUser }) => {
         const response = await authFetch(`/api/v1/transcripts?user_id=${authUser.user_id}`);
         if (!response.ok) throw new Error("Unable to load dashboard history");
         const transcripts = await response.json();
+        setWeeklyDataSets({
+          "This Week": buildWeeklyData(transcripts),
+          "Last Week": buildWeeklyData(transcripts, 1),
+        });
         const scores = transcripts.map((item) => item.evaluation?.overall_score).filter((score) => Number.isFinite(score));
         const seconds = transcripts.reduce((total, item) => total + (item.duration_seconds || 0), 0);
         const nextDashboardData = {
@@ -187,8 +212,11 @@ const Dashboard = ({ authUser }) => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (recordingState === "recording" && countdown === 0) {
-      stopSpeech();
-      saveTranscript({ userId: authUser?.user_id, durationSeconds: 60, topic: selectedTopic }).catch((error) => console.error("Transcript save error:", error));
+      const finishRecording = async () => {
+        await stopSpeech();
+        await saveTranscript({ userId: authUser?.user_id, durationSeconds: 60, topic: selectedTopic });
+      };
+      finishRecording().catch((error) => console.error("Transcript save error:", error));
       setRecordingState("analyzing");
       setTimeout(() => {
         setRecordingState("completed");
@@ -218,9 +246,9 @@ const Dashboard = ({ authUser }) => {
     setCountdown(60);
   };
 
-  const handleStopRecording = () => {
-    stopSpeech();
-    saveTranscript({ userId: authUser?.user_id, durationSeconds: 60 - countdown, topic: selectedTopic }).catch((error) => console.error("Transcript save error:", error));
+  const handleStopRecording = async () => {
+    await stopSpeech();
+    await saveTranscript({ userId: authUser?.user_id, durationSeconds: 60 - countdown, topic: selectedTopic }).catch((error) => console.error("Transcript save error:", error));
     setRecordingState("analyzing");
     setTimeout(() => {
       setRecordingState("completed");

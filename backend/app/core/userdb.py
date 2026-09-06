@@ -27,6 +27,9 @@ from ..models.transcript import SpeechTranscript
 
 def ensure_domain_column():
     """Add the domain column for databases created before domain was introduced."""
+    if not inspect(engine).has_table("users"):
+        return
+
     columns = {column["name"] for column in inspect(engine).get_columns("users")}
     if "domain" not in columns:
         with engine.begin() as connection:
@@ -36,10 +39,6 @@ def ensure_domain_column():
     if "presence_status" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE users ADD COLUMN presence_status VARCHAR(20) DEFAULT 'logged_out' NOT NULL"))
-
-
-ensure_domain_column()
-
 
 def initialize_admin_user():
     """Create the initial admin user in the database if it does not exist."""

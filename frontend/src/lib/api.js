@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8001";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export function authFetch(path, options = {}) {
   const authUser = JSON.parse(localStorage.getItem("authUser") || "null");

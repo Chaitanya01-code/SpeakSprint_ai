@@ -62,7 +62,7 @@ FastAPI-based backend server for the SpeakSprint AI application. Handles user au
    uvicorn app.main:app --reload
    ```
 
-The API will be available at `http://localhost:8001` for local development. Docker uses port `8000`.
+The API will be available at `http://localhost:8000` for local development and Docker.
 
 ## 📚 API Documentation
 

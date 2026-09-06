@@ -36,7 +36,7 @@ const SpinWheel = () => {
 	const { audioLevel, error: speechError, isListening, saveTranscript, start, stop, transcript } = useSpeechToText();
 	const isRecording = isListening;
 	const stopAndSave = async () => {
-		stop();
+		await stop();
 		setSaveNotice({ type: "saving", message: "Saving transcript..." });
 		try {
 			const savedTranscript = await saveTranscript({
@@ -196,7 +196,7 @@ const SpinWheel = () => {
 				</section>
 
 				<section className="practice-section timer-section" id="timer">
-					<div className="section-heading"><div><h1>2. Speak for 120 Seconds</h1><p>You have 5 seconds to prepare, then speak for 120 seconds.</p></div><span className="step-pill">STEP 2 OF 3</span></div>
+					<div className="section-heading"><div><h1>2. Speak for {sessionDuration} Seconds</h1><p>You have 5 seconds to prepare, then speak for {sessionDuration} seconds.</p></div><span className="step-pill">STEP 2 OF 3</span></div>
 					<div className="timer-grid">
 						<article className="countdown-panel"><h3>{isPreparing ? "Get Ready!" : "Ready!"}</h3><div className="countdown-ring"><strong>{preparationSeconds.toString().padStart(2, "0")}</strong><small>seconds</small></div><div className="dots">{Array.from({ length: 6 }, (_, index) => index < 5 - preparationSeconds ? "●" : "○").join(" ")}</div><span className="panel-state"><span>♩</span> Microphone ready <b>✓</b></span></article>
 						<article className="speak-panel"><div className="speak-panel-title"><h3>Speak Now!</h3><span>{sessionDuration}s</span></div><div className="speak-mic-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8" /></svg></div><strong className="time-display">{formatTime(seconds)}</strong><p>Tap the mic to start speaking</p><div className="timeline"><span>0s</span><i><b /></i><span>{Math.round(sessionDuration / 2)}s</span><i><b /></i><span>{sessionDuration}s</span></div></article>

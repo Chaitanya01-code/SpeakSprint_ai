@@ -11,12 +11,14 @@ from app.models import user
 from app.models import attempt
 from app.models import transcript
 from app.core import create_all_tables, initialize_admin_user, initialize_default_settings
+from app.core.userdb import ensure_domain_column
 from app.voice.speech_to_text import router as speech_to_text_router
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Initialize database objects and seed data once when the app starts."""
     create_all_tables()
+    ensure_domain_column()
     transcript.ensure_transcript_analysis_columns()
     initialize_admin_user()
     initialize_default_settings()

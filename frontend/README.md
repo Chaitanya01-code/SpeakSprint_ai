@@ -14,7 +14,7 @@ npm install
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-The frontend runs at `http://127.0.0.1:5173` and uses `http://localhost:8001` locally. Set `VITE_BACKEND_URL` in `frontend/.env` to override the backend URL.
+The frontend runs at `http://127.0.0.1:5173` and uses `http://localhost:8000` locally. Set `VITE_BACKEND_URL` in `frontend/.env` to override the backend URL.
 
 Available scripts:
 

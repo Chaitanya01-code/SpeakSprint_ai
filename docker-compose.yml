@@ -1,40 +1,27 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: speaksprint
-      POSTGRES_USER: speaksprint
-      POSTGRES_PASSWORD: speaksprint
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U speaksprint -d speaksprint"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   backend:
+    env_file:
+      - path: ./.env
+        required: false
     build:
       context: ./backend
       dockerfile: dockerfile
     environment:
-      DB_URL: postgresql://speaksprint:speaksprint@db:5432/speaksprint
+      DB_URL: ${DB_URL:-sqlite:///./speaksprint.db}
       DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin123}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@speaksprint.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     ports:
       - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - ./backend:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
+    env_file:
+      - path: ./.env
+        required: false
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -51,5 +38,4 @@ services:
       - backend
 
 volumes:
-  postgres_data:
   frontend_node_modules:
