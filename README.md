@@ -2,6 +2,8 @@
 
 SpeakSprint AI is a React and FastAPI application for speech practice. It streams microphone audio to Deepgram, stores user-owned transcripts and AI evaluations, and displays results in user and admin dashboards.
 
+See [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) for the complete technology inventory, application workflow, Docker setup, environment variables, testing commands, and CI workflow.
+
 ## Requirements
 
 - Docker Desktop with Docker Compose
