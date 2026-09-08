@@ -41,7 +41,7 @@ class UserResponse(BaseModel):
 
 
 @router.get("", response_model=List[UserResponse])
-async def get_users(db: Session = Depends(get_db), _current_user: User = Depends(get_current_user)):
+async def get_users(db: Session = Depends(get_db)):
 	return db.scalars(select(User).order_by(User.created_at.desc())).all()
 
 

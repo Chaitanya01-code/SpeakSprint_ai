@@ -11,10 +11,6 @@ export default function Home() {
   const goToLogin = () => { window.location.href = '/login'; };
   const goToSignup = () => { window.location.href = '/signup'; };
   const startSpeaking = () => {
-    if (!JSON.parse(localStorage.getItem('authUser') || 'null')?.access_token) {
-      window.location.href = '/login';
-      return;
-    }
     setIsUserSelectionOpen(true);
     if (users.length || usersLoading) return;
     setUsersLoading(true);

@@ -177,6 +177,10 @@ const Login = () => {
               Sign up
             </a>
           </div>
+
+          <a href="/" className="back-home-link">
+            ← Back to home
+          </a>
         </div>
       </div>
     </div>
