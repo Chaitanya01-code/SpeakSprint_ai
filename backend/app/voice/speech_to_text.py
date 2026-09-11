@@ -38,16 +38,6 @@ async def speech_to_text(websocket: WebSocket) -> None:
 
     user_id = websocket.query_params.get("user_id")
     previous_presence = None
-    if user_id and user_id.isdigit():
-        db = SessionLocal()
-        try:
-            user = db.scalar(select(User).where(User.id == int(user_id)))
-            if user:
-                previous_presence = user.presence_status
-                user.presence_status = "speaking"
-                db.commit()
-        finally:
-            db.close()
 
     try:
         from deepgram import DeepgramClient, LiveOptions, LiveTranscriptionEvents
@@ -84,19 +74,34 @@ async def speech_to_text(websocket: WebSocket) -> None:
             )
 
     connection.on(LiveTranscriptionEvents.Transcript, handle_transcript)
-    started = connection.start(
-        LiveOptions(
-            model="nova-2",
-            language="en-US",
-            smart_format=True,
-            punctuate=True,
-            interim_results=True,
-            endpointing="300",
+    try:
+        started = connection.start(
+            LiveOptions(
+                model="nova-2",
+                language="en-US",
+                smart_format=True,
+                punctuate=True,
+                interim_results=True,
+                endpointing="300",
+            )
         )
-    )
+    except OSError:
+        await websocket.close(code=1011, reason="Unable to connect to Deepgram")
+        return
     if not started:
         await websocket.close(code=1011, reason="Unable to start Deepgram transcription")
         return
+
+    if user_id and user_id.isdigit():
+        db = SessionLocal()
+        try:
+            user = db.scalar(select(User).where(User.id == int(user_id)))
+            if user:
+                previous_presence = user.presence_status
+                user.presence_status = "speaking"
+                db.commit()
+        finally:
+            db.close()
 
     receive_task = asyncio.create_task(websocket.receive())
     transcript_task = asyncio.create_task(transcript_queue.get())
