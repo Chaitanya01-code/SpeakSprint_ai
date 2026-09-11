@@ -9,6 +9,8 @@ services:
     environment:
       DB_URL: ${DB_URL:-sqlite:///./speaksprint.db}
       DEEPGRAM_API_KEY: ${DEEPGRAM_API_KEY:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-development-secret-change-me}
+      JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin123}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@speaksprint.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}

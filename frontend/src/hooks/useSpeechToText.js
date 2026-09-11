@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { API_BASE_URL, authFetch } from "../lib/api";
+import { API_BASE_URL } from "../lib/api";
 
 const getSpeechSocketUrl = () => {
   const configuredUrl = import.meta.env.VITE_BACKEND_URL;
@@ -141,7 +141,7 @@ export default function useSpeechToText() {
     const text = (latestTranscriptRef.current || transcript).trim();
     if (!userId || !text) return null;
 
-    const response = await authFetch("/api/v1/transcripts", {
+    const response = await fetch(`${API_BASE_URL}/api/v1/transcripts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

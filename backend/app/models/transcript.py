@@ -97,10 +97,7 @@ def sync_transcripts_to_attempts():
 async def create_transcript(
     payload: TranscriptCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    require_user_or_admin(payload.user_id, current_user)
-
     user = db.scalar(select(User).where(User.id == payload.user_id, User.is_active.is_(True)))
     if not user:
         raise HTTPException(status_code=404, detail="Active user not found")
